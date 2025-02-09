@@ -206,10 +206,6 @@ export default function ViewProducts() {
 
   return (
     <div className="p-6 sm:p-8 bg-white min-h-screen w-full">
-      <h1 className="text-3xl text-center font-bold text-gray-800 mb-6">
-        Your Products
-      </h1>
-
       <div className="flex justify-between items-center mb-6">
         <div className="w-1/2">
           <input
