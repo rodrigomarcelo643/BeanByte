@@ -45,6 +45,7 @@ import Reporting from "../pages/Reporting";
 import Orders from "../pages/Orders";
 import Products from "../pages/Products";
 import ViewProducts from "../pages/ViewProducts"; // Assuming these are your page components
+import Profile from "../pages/Profile";
 
 export function Sidebar() {
   const location = useLocation();
@@ -107,6 +108,10 @@ export function Sidebar() {
     if (content === "Products") {
       setActiveContent(<Products />);
       setLastClickedContent(<Products />);
+    }
+    if (content === "Profile") {
+      setActiveContent(<Profile />);
+      setLastClickedContent(<Profile />);
     }
     if (content === "Log Out") {
       setActiveContent(null);
@@ -368,7 +373,7 @@ export function Sidebar() {
             onClick={() => updateContent("Profile")}
             className="group cursor-pointer relative hover:bg-gray-200 p-2"
           >
-            <ListItemPrefix>
+            <ListItemPrefix onClick={() => updateContent("Profile")}>
               <UserCircleIcon className="h-6 w-6 text-[#724E2C]" />
             </ListItemPrefix>
             <Typography className="ml-2">Profile</Typography>

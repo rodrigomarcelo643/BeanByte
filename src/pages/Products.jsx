@@ -112,28 +112,77 @@ export default function Products() {
   };
 
   return (
-    <div className=" bg-gray-50 w-[96%] ml-10 mt-10 ">
+    <div className="bg-gray-50 w-[96%] ml-10 mt-10">
       <div className="max-w-6xl mx-auto p-8 rounded-lg shadow-lg bg-white">
         <h4 className="text-center text-gray-800 mb-6">Add a New Product</h4>
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Product Name */}
-          <div>
-            <label htmlFor="productName" className="block mb-2 text-gray-700">
-              Product Name
-            </label>
-            <input
-              id="productName"
-              type="text"
-              value={productName}
-              onChange={(e) => setProductName(e.target.value)}
-              placeholder="Enter product name"
-              className="w-full h-12 border rounded-[10px] border-[#724E2C] focus:outline-none focus:border-[#724E2C] placeholder:text-gray-400 placeholder:opacity-75 p-2"
-            />
+          {/* Product Name and Price */}
+          <div className="flex flex-col sm:flex-row sm:space-x-4">
+            <div className="flex flex-col w-full sm:w-1/2">
+              <label htmlFor="productName" className="block mb-2 text-gray-700">
+                Product Name
+              </label>
+              <input
+                id="productName"
+                type="text"
+                value={productName}
+                onChange={(e) => setProductName(e.target.value)}
+                placeholder="Enter product name"
+                className="h-12 border rounded-[10px] border-[#724E2C] focus:outline-none focus:border-[#724E2C] placeholder:text-gray-400 placeholder:opacity-75 p-2"
+              />
+            </div>
+            <div className="flex flex-col w-full sm:w-1/2">
+              <label htmlFor="price" className="block mb-2 text-gray-700">
+                Price
+              </label>
+              <input
+                id="price"
+                type="number"
+                value={price}
+                onChange={(e) => setPrice(e.target.value)}
+                placeholder="Enter product price"
+                className="h-12 border rounded-[10px] border-[#724E2C] focus:outline-none focus:border-[#724E2C] placeholder:text-gray-400 placeholder:opacity-75 p-2"
+              />
+            </div>
+          </div>
+
+          {/* Stock and Category */}
+          <div className="flex flex-col sm:flex-row sm:space-x-4">
+            <div className="flex flex-col w-full sm:w-1/2">
+              <label htmlFor="stock" className="block mb-2 text-gray-700">
+                Stock Quantity
+              </label>
+              <input
+                id="stock"
+                type="number"
+                value={stock}
+                onChange={(e) => setStock(e.target.value)}
+                placeholder="Enter stock quantity"
+                className="h-12 border rounded-[10px] border-[#724E2C] focus:outline-none focus:border-[#724E2C] placeholder:text-gray-400 placeholder:opacity-75 p-2"
+              />
+            </div>
+            <div className="flex flex-col w-full sm:w-1/2">
+              <label htmlFor="category" className="block mb-2 text-gray-700">
+                Product Category
+              </label>
+              <select
+                id="category"
+                value={category}
+                onChange={(e) => setCategory(e.target.value)}
+                className="h-12 border rounded-[10px] border-[#724E2C] focus:outline-none focus:border-[#724E2C] bg-gray-100 text-gray-700 p-2"
+              >
+                <option value="">Select Category</option>
+                <option value="Coffee">Coffee</option>
+                <option value="Tea">Tea</option>
+                <option value="Snacks">Snacks</option>
+                <option value="Accessories">Accessories</option>
+              </select>
+            </div>
           </div>
 
           {/* Description */}
-          <div>
+          <div className="flex flex-col">
             <label htmlFor="description" className="block mb-2 text-gray-700">
               Description
             </label>
@@ -142,62 +191,13 @@ export default function Products() {
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               placeholder="Enter product description"
-              rows={4}
-              className="w-full h-32 border rounded-[10px] border-[#724E2C] focus:outline-none focus:border-[#724E2C] placeholder:text-gray-400 placeholder:opacity-75 p-2"
+              rows={6}
+              className="w-full border rounded-[10px] border-[#724E2C] focus:outline-none focus:border-[#724E2C] placeholder:text-gray-400 placeholder:opacity-75 p-2"
             />
-          </div>
-
-          {/* Price */}
-          <div>
-            <label htmlFor="price" className="block mb-2 text-gray-700">
-              Price
-            </label>
-            <input
-              id="price"
-              type="number"
-              value={price}
-              onChange={(e) => setPrice(e.target.value)}
-              placeholder="Enter product price"
-              className="w-full h-12 border rounded-[10px] border-[#724E2C] focus:outline-none focus:border-[#724E2C] placeholder:text-gray-400 placeholder:opacity-75 p-2"
-            />
-          </div>
-
-          {/* Stock */}
-          <div>
-            <label htmlFor="stock" className="block mb-2 text-gray-700">
-              Stock Quantity
-            </label>
-            <input
-              id="stock"
-              type="number"
-              value={stock}
-              onChange={(e) => setStock(e.target.value)}
-              placeholder="Enter stock quantity"
-              className="w-full h-12 border rounded-[10px] border-[#724E2C] focus:outline-none focus:border-[#724E2C] placeholder:text-gray-400 placeholder:opacity-75 p-2"
-            />
-          </div>
-
-          {/* Product Category Dropdown */}
-          <div>
-            <label htmlFor="category" className="block mb-2 text-gray-700">
-              Product Category
-            </label>
-            <select
-              id="category"
-              value={category}
-              onChange={(e) => setCategory(e.target.value)}
-              className="w-full h-12 border rounded-[10px] border-[#724E2C] focus:outline-none focus:border-[#724E2C] bg-gray-100 text-gray-700 p-2"
-            >
-              <option value="">Select Category</option>
-              <option value="Coffee">Coffee</option>
-              <option value="Tea">Tea</option>
-              <option value="Snacks">Snacks</option>
-              <option value="Accessories">Accessories</option>
-            </select>
           </div>
 
           {/* Image Upload */}
-          <div>
+          <div className="flex flex-col">
             <label htmlFor="image" className="block mb-2 text-gray-700">
               Upload Product Image
             </label>
@@ -206,7 +206,7 @@ export default function Products() {
               type="file"
               onChange={handleImageChange}
               accept="image/*"
-              className="w-[200px] text-sm text-gray-700 border-2 border-[#724E2C] rounded-md py-2 px-4 cursor-pointer focus:outline-none"
+              className="text-sm text-gray-700 border-2 w-[200px] border-[#724E2C] rounded-md py-2 px-4 cursor-pointer focus:outline-none"
             />
           </div>
 
