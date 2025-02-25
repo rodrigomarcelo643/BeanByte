@@ -179,7 +179,6 @@ export default function Products() {
               <option value="">Select Category</option>
               <option value="Coffee">Coffee</option>
               <option value="Tea">Tea</option>
-              <option value="Snacks">Snacks</option>
             </select>
           </div>
 
