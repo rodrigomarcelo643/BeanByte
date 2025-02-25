@@ -139,6 +139,7 @@ const LandingPage = () => {
         <div className="hidden md:flex items-center space-x-6">
           <a
             href="#Order"
+            onClick={() => handleTabChange("products")}
             className="text-[15px] shadow-lg border-2 bg-[#6F4E37] text-white border-[#6F4E37] py-1 px-7 hover:bg-[#e0bba1e1] hover:text-[#36322fe1] rounded-[10px] text-brown-600 hover:bg-brown-100"
           >
             Order Now!
@@ -250,7 +251,10 @@ const LandingPage = () => {
                   every moment feels like home.
                 </motion.p>
               </div>
-              <button className="px-8 py-3 bg-[#6F4E37] hover:bg-[#95735C] cursor-pointer mt-5 text-white text-[18px] rounded-[10px] hover:bg-brown-700 flex items-center space-x-2">
+              <button
+                onClick={() => handleTabChange("products")}
+                className="px-8 py-3 bg-[#6F4E37] hover:bg-[#95735C] cursor-pointer mt-5 text-white text-[18px] rounded-[10px] hover:bg-brown-700 flex items-center space-x-2"
+              >
                 <span>Explore</span>
                 <FaChevronRight className="w-4 h-4" />
               </button>
