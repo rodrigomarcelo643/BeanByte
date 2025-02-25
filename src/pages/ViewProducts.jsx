@@ -205,7 +205,7 @@ export default function ViewProducts() {
   }, [search, category]);
 
   return (
-    <div className="p-6 sm:p-8 bg-white min-h-screen w-full">
+    <div className="p-6 sm:p-8 bg-white min-h-screen w-full lg:w-[85%] lg:ml-3">
       <div className="flex justify-between items-center mb-6">
         <div className="w-1/2">
           <input

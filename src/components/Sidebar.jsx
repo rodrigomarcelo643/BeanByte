@@ -44,13 +44,17 @@ import Analytics from "../pages/Analytics";
 import Reporting from "../pages/Reporting";
 import Orders from "../pages/Orders";
 import Products from "../pages/Products";
-import ViewProducts from "../pages/ViewProducts"; // Assuming these are your page components
+import ViewProducts from "../pages/ViewProducts";
 import Profile from "../pages/Profile";
+import Payments from "../pages/Payments";
+import PaymentHistory from "../pages/PaymentHistory";
+import AddOrder from "../pages/AddOrder";
 
 export function Sidebar() {
   const location = useLocation();
   const navigate = useNavigate();
   const userData = location.state?.userData;
+  console.log(userData);
   const [open, setOpen] = useState(0);
   const [activeContent, setActiveContent] = useState(<Analytics />);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -100,6 +104,18 @@ export function Sidebar() {
     if (content === "Orders") {
       setActiveContent(<Orders />);
       setLastClickedContent(<Orders />);
+    }
+    if (content === "Payments") {
+      setActiveContent(<Payments />);
+      setLastClickedContent(<Payments />);
+    }
+    if (content === "PaymentHistory") {
+      setActiveContent(<PaymentHistory />);
+      setLastClickedContent(<PaymentHistory />);
+    }
+    if (content === "AddOrder") {
+      setActiveContent(<AddOrder />);
+      setLastClickedContent(<AddOrder />);
     }
     if (content === "ViewProducts") {
       setActiveContent(<ViewProducts />);
@@ -298,7 +314,7 @@ export function Sidebar() {
               <List className="p-0">
                 <ListItem
                   className="cursor-pointer"
-                  onClick={() => updateContent("Orders")}
+                  onClick={() => updateContent("Payments")}
                 >
                   <ListItemPrefix>
                     <ChevronDownIcon strokeWidth={3} className="h-3 w-5" />
@@ -307,7 +323,7 @@ export function Sidebar() {
                 </ListItem>
                 <ListItem
                   className="cursor-pointer"
-                  onClick={() => updateContent("Requests")}
+                  onClick={() => updateContent("PaymentHistory")}
                 >
                   <ListItemPrefix>
                     <ChevronDownIcon strokeWidth={3} className="h-3 w-5" />
@@ -347,7 +363,7 @@ export function Sidebar() {
               <List className="p-0">
                 <ListItem
                   className="cursor-pointer"
-                  onClick={() => updateContent("Orders")}
+                  onClick={() => updateContent("AddOrder")}
                 >
                   <ListItemPrefix>
                     <ChevronDownIcon strokeWidth={3} className="h-3 w-5" />
@@ -356,7 +372,7 @@ export function Sidebar() {
                 </ListItem>
                 <ListItem
                   className="cursor-pointer"
-                  onClick={() => updateContent("Requests")}
+                  onClick={() => updateContent("Orders")}
                 >
                   <ListItemPrefix>
                     <ChevronDownIcon strokeWidth={3} className="h-3 w-5" />
@@ -377,16 +393,6 @@ export function Sidebar() {
               <UserCircleIcon className="h-6 w-6 text-[#724E2C]" />
             </ListItemPrefix>
             <Typography className="ml-2">Profile</Typography>
-          </ListItem>
-
-          <ListItem
-            onClick={() => updateContent("Settings")}
-            className="group cursor-pointer relative hover:bg-gray-200 p-2"
-          >
-            <ListItemPrefix>
-              <Cog6ToothIcon className="h-6 w-6 text-[#724E2C]" />
-            </ListItemPrefix>
-            <Typography className="ml-2">Settings</Typography>
           </ListItem>
 
           <ListItem
@@ -493,7 +499,7 @@ export function Sidebar() {
         </div>
 
         {/* Content Display */}
-        <div className="pt-25 p-8 w-[84%] relative md:left-0  overflow-x-hidden lg:left-50 bg-gray-100">
+        <div className="pt-25 p-8 w-full relative md:left-0  overflow-x-hidden lg:left-55 bg-gray-100">
           {activeContent}
         </div>
       </div>

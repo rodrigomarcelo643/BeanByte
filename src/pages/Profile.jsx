@@ -35,29 +35,31 @@ const Profile = () => {
   };
 
   return (
-    <div className="min-h-screen bg-transparent flex items-center justify-center ">
-      <div className="max-w-3xl w-full bg-white shadow-lg rounded-lg p-8 space-y-6 relative">
-        {/* Edit Icon positioned at the top left */}
+    <div className="min-h-screen bg-[#F4F7F6] flex items-center justify-center py-8">
+      <div className="max-w-3xl w-full lg:ml-[-150px] bg-white shadow-lg rounded-xl p-10 space-y-8 relative">
+        {/* Edit Icon positioned at the top right */}
         {!isEditing && (
           <div className="absolute top-4 right-4">
             <button
               onClick={handleEditToggle}
-              className="p-2 bg-[#724E2C] text-white rounded-full shadow-md hover:bg-[#aa9988] focus:outline-none focus:ring-2 focus:ring-[#724E2C]"
+              className="p-3 bg-[#724E2C] text-white rounded-full shadow-xl hover:bg-[#aa9988] focus:outline-none focus:ring-2 focus:ring-[#724E2C] transition-all"
             >
-              <FaEdit size={20} />
+              <FaEdit size={22} />
             </button>
           </div>
         )}
 
         {userData ? (
           <>
-            <h2 className="text-3xl font-bold text-center text-[#724E2C]"></h2>
+            <h2 className="text-3xl font-bold text-center text-[#724E2C]">
+              Profile
+            </h2>
 
-            <div className="space-y-6">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                {/* First Name */}
-                <div className="flex flex-col space-y-3">
-                  <label className="text-lg font-semibold text-gray-800">
+            <div className="space-y-8">
+              {/* First Name and Last Name */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
+                <div className="flex flex-col space-y-4">
+                  <label className="text-lg font-medium text-gray-800">
                     First Name
                   </label>
                   <input
@@ -65,14 +67,13 @@ const Profile = () => {
                     name="firstName"
                     value={userData.firstName}
                     onChange={handleInputChange}
-                    disabled={!isEditing} // Disable input when not editing
-                    className="px-4 py-2 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-[#724E2C]"
+                    disabled={!isEditing}
+                    className="px-5 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-[#724E2C] transition-all"
                   />
                 </div>
 
-                {/* Last Name */}
-                <div className="flex flex-col space-y-3">
-                  <label className="text-lg font-semibold text-gray-800">
+                <div className="flex flex-col space-y-4">
+                  <label className="text-lg font-medium text-gray-800">
                     Last Name
                   </label>
                   <input
@@ -80,16 +81,16 @@ const Profile = () => {
                     name="lastName"
                     value={userData.lastName}
                     onChange={handleInputChange}
-                    disabled={!isEditing} // Disable input when not editing
-                    className="px-4 py-2 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-[#724E2C]"
+                    disabled={!isEditing}
+                    className="px-5 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-[#724E2C] transition-all"
                   />
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                {/* Username */}
-                <div className="flex flex-col space-y-3">
-                  <label className="text-lg font-semibold text-gray-800">
+              {/* Username and Email */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
+                <div className="flex flex-col space-y-4">
+                  <label className="text-lg font-medium text-gray-800">
                     Username
                   </label>
                   <input
@@ -97,14 +98,13 @@ const Profile = () => {
                     name="username"
                     value={userData.username}
                     onChange={handleInputChange}
-                    disabled={!isEditing} // Disable input when not editing
-                    className="px-4 py-2 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-[#724E2C]"
+                    disabled={!isEditing}
+                    className="px-5 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-[#724E2C] transition-all"
                   />
                 </div>
 
-                {/* Email */}
-                <div className="flex flex-col space-y-3">
-                  <label className="text-lg font-semibold text-gray-800">
+                <div className="flex flex-col space-y-4">
+                  <label className="text-lg font-medium text-gray-800">
                     Email
                   </label>
                   <input
@@ -112,16 +112,16 @@ const Profile = () => {
                     name="email"
                     value={userData.email}
                     onChange={handleInputChange}
-                    disabled={!isEditing} // Disable input when not editing
-                    className="px-4 py-2 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-[#724E2C]"
+                    disabled={!isEditing}
+                    className="px-5 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-[#724E2C] transition-all"
                   />
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                {/* Contact Number */}
-                <div className="flex flex-col space-y-3">
-                  <label className="text-lg font-semibold text-gray-800">
+              {/* Contact Number and Address */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
+                <div className="flex flex-col space-y-4">
+                  <label className="text-lg font-medium text-gray-800">
                     Contact Number
                   </label>
                   <input
@@ -129,14 +129,13 @@ const Profile = () => {
                     name="contactNumber"
                     value={userData.contactNumber}
                     onChange={handleInputChange}
-                    disabled={!isEditing} // Disable input when not editing
-                    className="px-4 py-2 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-[#724E2C]"
+                    disabled={!isEditing}
+                    className="px-5 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-[#724E2C] transition-all"
                   />
                 </div>
 
-                {/* Address */}
-                <div className="flex flex-col space-y-3">
-                  <label className="text-lg font-semibold text-gray-800">
+                <div className="flex flex-col space-y-4">
+                  <label className="text-lg font-medium text-gray-800">
                     Address
                   </label>
                   <input
@@ -144,8 +143,8 @@ const Profile = () => {
                     name="address"
                     value={userData.address}
                     onChange={handleInputChange}
-                    disabled={!isEditing} // Disable input when not editing
-                    className="px-4 py-2 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-[#724E2C]"
+                    disabled={!isEditing}
+                    className="px-5 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-[#724E2C] transition-all"
                   />
                 </div>
               </div>
@@ -155,7 +154,7 @@ const Profile = () => {
                 <div className="text-center">
                   <button
                     onClick={handleSaveChanges}
-                    className="px-6 py-2 bg-[#724E2C] text-white rounded-lg shadow-md hover:bg-[#aa9988] focus:outline-none focus:ring-2 focus:ring-[#724E2C]"
+                    className="px-8 py-3 bg-[#724E2C] text-white rounded-lg shadow-xl hover:bg-[#aa9988] focus:outline-none focus:ring-2 focus:ring-[#724E2C] transition-all"
                   >
                     Save Changes
                   </button>

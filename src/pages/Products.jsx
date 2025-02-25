@@ -1,9 +1,9 @@
 import React, { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { firestore, storage, auth } from "../../config/firebase"; // Import Firebase services
+import { firestore, storage, auth } from "../../config/firebase";
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 import { collection, addDoc } from "firebase/firestore";
-import Swal from "sweetalert2"; // Import SweetAlert2
+import Swal from "sweetalert2";
 
 export default function Products() {
   const location = useLocation();
@@ -14,8 +14,8 @@ export default function Products() {
   const [price, setPrice] = useState("");
   const [stock, setStock] = useState("");
   const [imageFile, setImageFile] = useState(null);
-  const [category, setCategory] = useState(""); // New state for category
-  const [uploading, setUploading] = useState(false); // Track upload progress
+  const [category, setCategory] = useState("");
+  const [uploading, setUploading] = useState(false);
 
   const navigate = useNavigate();
 
@@ -79,8 +79,8 @@ export default function Products() {
             price,
             stock,
             imageUrl,
-            category, // Added category to product
-            userId, // Associate product with the logged-in user
+            category,
+            userId,
             createdAt: new Date(),
           });
 
@@ -95,9 +95,9 @@ export default function Products() {
             setDescription("");
             setPrice("");
             setStock("");
-            setCategory(""); // Reset category
-            setImageFile(null); // Reset the image file
-            setUploading(false); // Reset uploading state
+            setCategory("");
+            setImageFile(null);
+            setUploading(false);
           });
         } catch (error) {
           console.error("Error adding product: ", error);
@@ -112,28 +112,32 @@ export default function Products() {
   };
 
   return (
-    <div className="bg-gray-50 w-[96%] ml-10 mt-10">
-      <div className="max-w-6xl mx-auto p-8 rounded-lg shadow-lg bg-white">
-        <h4 className="text-center text-gray-800 mb-6">Add a New Product</h4>
+    <div className="bg-gray-100 w-full h-full ">
+      <div className="max-w-3xl lg:relative lg:left-[-100px] mx-auto p-8 rounded-xl shadow-md bg-white">
+        <h4 className="text-center text-xl font-semibold text-gray-700 mb-6">
+          Add a New Product
+        </h4>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Product Name and Price */}
-          <div className="flex flex-col sm:flex-row sm:space-x-4">
-            <div className="flex flex-col w-full sm:w-1/2">
-              <label htmlFor="productName" className="block mb-2 text-gray-700">
-                Product Name
-              </label>
-              <input
-                id="productName"
-                type="text"
-                value={productName}
-                onChange={(e) => setProductName(e.target.value)}
-                placeholder="Enter product name"
-                className="h-12 border rounded-[10px] border-[#724E2C] focus:outline-none focus:border-[#724E2C] placeholder:text-gray-400 placeholder:opacity-75 p-2"
-              />
-            </div>
-            <div className="flex flex-col w-full sm:w-1/2">
-              <label htmlFor="price" className="block mb-2 text-gray-700">
+        <form onSubmit={handleSubmit} className="space-y-6">
+          {/* Product Name */}
+          <div>
+            <label htmlFor="productName" className="block text-gray-600 mb-2">
+              Product Name
+            </label>
+            <input
+              id="productName"
+              type="text"
+              value={productName}
+              onChange={(e) => setProductName(e.target.value)}
+              placeholder="Enter product name"
+              className="w-full h-12 border border-gray-300 rounded-md p-3 focus:outline-none focus:ring-2 focus:ring-[#724E2C] placeholder:text-gray-500"
+            />
+          </div>
+
+          {/* Price and Stock */}
+          <div className="flex space-x-4">
+            <div className="flex-1">
+              <label htmlFor="price" className="block text-gray-600 mb-2">
                 Price
               </label>
               <input
@@ -142,15 +146,12 @@ export default function Products() {
                 value={price}
                 onChange={(e) => setPrice(e.target.value)}
                 placeholder="Enter product price"
-                className="h-12 border rounded-[10px] border-[#724E2C] focus:outline-none focus:border-[#724E2C] placeholder:text-gray-400 placeholder:opacity-75 p-2"
+                className="w-full h-12 border border-gray-300 rounded-md p-3 focus:outline-none focus:ring-2 focus:ring-[#724E2C] placeholder:text-gray-500"
               />
             </div>
-          </div>
 
-          {/* Stock and Category */}
-          <div className="flex flex-col sm:flex-row sm:space-x-4">
-            <div className="flex flex-col w-full sm:w-1/2">
-              <label htmlFor="stock" className="block mb-2 text-gray-700">
+            <div className="flex-1">
+              <label htmlFor="stock" className="block text-gray-600 mb-2">
                 Stock Quantity
               </label>
               <input
@@ -159,31 +160,32 @@ export default function Products() {
                 value={stock}
                 onChange={(e) => setStock(e.target.value)}
                 placeholder="Enter stock quantity"
-                className="h-12 border rounded-[10px] border-[#724E2C] focus:outline-none focus:border-[#724E2C] placeholder:text-gray-400 placeholder:opacity-75 p-2"
+                className="w-full h-12 border border-gray-300 rounded-md p-3 focus:outline-none focus:ring-2 focus:ring-[#724E2C] placeholder:text-gray-500"
               />
-            </div>
-            <div className="flex flex-col w-full sm:w-1/2">
-              <label htmlFor="category" className="block mb-2 text-gray-700">
-                Product Category
-              </label>
-              <select
-                id="category"
-                value={category}
-                onChange={(e) => setCategory(e.target.value)}
-                className="h-12 border rounded-[10px] border-[#724E2C] focus:outline-none focus:border-[#724E2C] bg-gray-100 text-gray-700 p-2"
-              >
-                <option value="">Select Category</option>
-                <option value="Coffee">Coffee</option>
-                <option value="Tea">Tea</option>
-                <option value="Snacks">Snacks</option>
-                <option value="Accessories">Accessories</option>
-              </select>
             </div>
           </div>
 
+          {/* Category */}
+          <div>
+            <label htmlFor="category" className="block text-gray-600 mb-2">
+              Product Category
+            </label>
+            <select
+              id="category"
+              value={category}
+              onChange={(e) => setCategory(e.target.value)}
+              className="w-full h-12 border border-gray-300 rounded-md p-3 focus:outline-none focus:ring-2 focus:ring-[#724E2C] bg-gray-100 text-gray-700"
+            >
+              <option value="">Select Category</option>
+              <option value="Coffee">Coffee</option>
+              <option value="Tea">Tea</option>
+              <option value="Snacks">Snacks</option>
+            </select>
+          </div>
+
           {/* Description */}
-          <div className="flex flex-col">
-            <label htmlFor="description" className="block mb-2 text-gray-700">
+          <div>
+            <label htmlFor="description" className="block text-gray-600 mb-2">
               Description
             </label>
             <textarea
@@ -192,13 +194,13 @@ export default function Products() {
               onChange={(e) => setDescription(e.target.value)}
               placeholder="Enter product description"
               rows={6}
-              className="w-full border rounded-[10px] border-[#724E2C] focus:outline-none focus:border-[#724E2C] placeholder:text-gray-400 placeholder:opacity-75 p-2"
+              className="w-full border border-gray-300 rounded-md p-3 focus:outline-none focus:ring-2 focus:ring-[#724E2C] placeholder:text-gray-500"
             />
           </div>
 
           {/* Image Upload */}
-          <div className="flex flex-col">
-            <label htmlFor="image" className="block mb-2 text-gray-700">
+          <div>
+            <label htmlFor="image" className="block text-gray-600 mb-2">
               Upload Product Image
             </label>
             <input
@@ -206,15 +208,15 @@ export default function Products() {
               type="file"
               onChange={handleImageChange}
               accept="image/*"
-              className="text-sm text-gray-700 border-2 w-[200px] border-[#724E2C] rounded-md py-2 px-4 cursor-pointer focus:outline-none"
+              className="w-full border border-gray-300 rounded-md py-2 px-3 cursor-pointer bg-gray-50"
             />
           </div>
 
           {/* Submit Button */}
-          <div className="flex justify-center mt-6">
+          <div className="flex justify-center">
             <button
               type="submit"
-              className="w-full sm:w-auto bg-[#724E2C] text-white py-3 px-8 cursor-pointer hover:bg-[#c7a687] rounded-md"
+              className="w-full sm:w-auto bg-[#724E2C] text-white py-3 px-8 rounded-md hover:bg-[#c7a687] focus:outline-none"
               disabled={uploading}
             >
               {uploading ? "Uploading..." : "Add Product"}

@@ -1,10 +1,9 @@
-// Import the necessary Firebase modules
 import { initializeApp } from "firebase/app";
 import { getAnalytics } from "firebase/analytics";
-import { getAuth } from "firebase/auth"; // Firebase Authentication
-import { getDatabase } from "firebase/database"; // Firebase Realtime Database
-import { getFirestore } from "firebase/firestore"; // Firestore
-import { getStorage } from "firebase/storage"; // Firebase Storage
+import { getAuth } from "firebase/auth";
+import { getDatabase } from "firebase/database";
+import { getFirestore } from "firebase/firestore";
+import { getStorage } from "firebase/storage";
 
 // Firebase configuration object
 const firebaseConfig = {

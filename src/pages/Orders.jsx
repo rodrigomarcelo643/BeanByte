@@ -79,7 +79,7 @@ export default function Orders() {
   }, []);
 
   return (
-    <div className="p-6 sm:p-8  bg-gray-50 min-h-screen w-full ">
+    <div className="p-6 sm:p-8  bg-gray-50 min-h-screen w-full lg:w-[85%] ">
       <h1 className="text-3xl text-center font-bold text-[#724E2C] mb-6">
         Customer Orders
       </h1>
