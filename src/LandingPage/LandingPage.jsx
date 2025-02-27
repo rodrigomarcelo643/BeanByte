@@ -312,10 +312,6 @@ const LandingPage = () => {
           <div className="mt-10">
             <Boxes />
           </div>
-          {/* Add spacing between section and Boxes */}
-          <div className="mt-10">
-            <CustomerReview />
-          </div>
         </>
       )}
       {/* Render Section based on the active tab */}
