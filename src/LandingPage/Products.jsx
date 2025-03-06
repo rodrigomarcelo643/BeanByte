@@ -204,7 +204,7 @@ export default function Products() {
       Swal.fire({
         icon: "success",
         title: "Order Placed",
-        text: `Your order has been placed successfully! Reference Number: ${orderReference} Payment Reference: ${paymentReference}`,
+        text: `Your order has been placed successfully! Reference Number: ${orderReference} Payment Reference: ${paymentReference}. Your Order will arrive within one hour or less than an hour `,
       });
 
       // Clear the cart after the order is placed
