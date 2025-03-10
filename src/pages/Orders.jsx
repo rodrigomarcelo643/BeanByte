@@ -340,29 +340,6 @@ export default function Orders() {
                   </div>
                 </div>
               </div>
-
-              {/* Additional Information */}
-              <div className="border-b border-dashed border-gray-300 pb-6">
-                <h3 className="text-xl font-semibold mb-4 flex items-center space-x-3">
-                  <i className="fas fa-info-circle text-gray-600"></i>
-                  <span>Additional Information</span>
-                </h3>
-                <div className="flex items-center space-x-3 mb-3">
-                  <i className="fas fa-align-left text-gray-500"></i>
-                  <p className="text-sm">
-                    <strong>Description:</strong> {viewOrder[0].description}
-                  </p>
-                </div>
-                <div className="flex items-center space-x-3">
-                  <i className="fas fa-clock text-gray-500"></i>
-                  <p className="text-sm">
-                    <strong>Order Timestamp:</strong>{" "}
-                    {new Date(
-                      viewOrder[0].timestamp.seconds * 1000
-                    ).toLocaleString()}
-                  </p>
-                </div>
-              </div>
             </div>
           </div>
         </div>

@@ -21,6 +21,8 @@ export default function AddOrder() {
   const [categories, setCategories] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [loading, setLoading] = useState(true);
+  const [orderType, setOrderType] = useState("Take-out"); // Default order type is Take-out
+  const [paymentMethod, setPaymentMethod] = useState("Cash"); // Default payment method is Cash
 
   // Fetch all products and categories from Firestore
   const fetchProducts = async () => {
@@ -84,9 +86,28 @@ export default function AddOrder() {
     setQuantity(1); // Reset quantity to 1 when a new product is selected
   };
 
-  // Handle quantity input change
-  const handleQuantityChange = (e) => {
-    setQuantity(parseInt(e.target.value) || 1); // Default quantity is 1
+  // Handle quantity increase
+  const increaseQuantity = () => {
+    if (quantity < selectedProduct?.stock) {
+      setQuantity(quantity + 1);
+    }
+  };
+
+  // Handle quantity decrease
+  const decreaseQuantity = () => {
+    if (quantity > 1) {
+      setQuantity(quantity - 1);
+    }
+  };
+
+  // Handle order type selection (Dine-in or Take-out)
+  const handleOrderTypeChange = (event) => {
+    setOrderType(event.target.value);
+  };
+
+  // Handle payment method selection (Cash or GCash)
+  const handlePaymentMethodChange = (event) => {
+    setPaymentMethod(event.target.value);
   };
 
   // Handle adding the order to Firestore
@@ -120,28 +141,143 @@ export default function AddOrder() {
       },
     ];
 
+    const today = new Date();
+
     try {
       // Record the order in Firestore under "revenueorders" collection
       const orderRef = await addDoc(collection(firestore, "revenueorders"), {
         items: orderItems,
         totalAmount: totalAmount,
         status: "Pending",
+        orderType: orderType, // Save order type (Dine-in or Take-out)
+        paymentMethod: paymentMethod, // Save selected payment method (Cash or GCash)
         createdAt: new Date(),
       });
 
-      // Check if the revenue document exists
+      // Update the revenue for daily, weekly, monthly, and yearly
+
+      // Daily Revenue
+      const dailyRevenueRef = doc(
+        firestore,
+        "dailyRevenue",
+        today.toISOString().split("T")[0]
+      );
+      const dailyRevenueSnapshot = await getDoc(dailyRevenueRef);
+      if (!dailyRevenueSnapshot.exists()) {
+        await setDoc(dailyRevenueRef, {
+          totalRevenue: totalAmount,
+          revenueDetails: [
+            {
+              date: today,
+              orderAmount: totalAmount,
+            },
+          ],
+        });
+      } else {
+        await updateDoc(dailyRevenueRef, {
+          totalRevenue: increment(totalAmount),
+          revenueDetails: arrayUnion({
+            date: today,
+            orderAmount: totalAmount,
+          }),
+        });
+      }
+
+      // Weekly Revenue (Start of the week is Sunday, End is Saturday)
+      const weekStart = new Date(
+        today.setDate(today.getDate() - today.getDay())
+      );
+      const weekEnd = new Date(today.setDate(weekStart.getDate() + 6));
+
+      const weeklyRevenueRef = doc(
+        firestore,
+        "weeklyRevenue",
+        `${weekStart.toISOString().split("T")[0]}_${
+          weekEnd.toISOString().split("T")[0]
+        }`
+      );
+      const weeklyRevenueSnapshot = await getDoc(weeklyRevenueRef);
+      if (!weeklyRevenueSnapshot.exists()) {
+        await setDoc(weeklyRevenueRef, {
+          totalRevenue: totalAmount,
+          revenueDetails: [
+            {
+              date: today,
+              orderAmount: totalAmount,
+            },
+          ],
+        });
+      } else {
+        await updateDoc(weeklyRevenueRef, {
+          totalRevenue: increment(totalAmount),
+          revenueDetails: arrayUnion({
+            date: today,
+            orderAmount: totalAmount,
+          }),
+        });
+      }
+
+      // Monthly Revenue (Format: YYYY-MM)
+      const monthKey = `${today.getFullYear()}-${(today.getMonth() + 1)
+        .toString()
+        .padStart(2, "0")}`;
+      const monthlyRevenueRef = doc(firestore, "monthlyRevenue", monthKey);
+      const monthlyRevenueSnapshot = await getDoc(monthlyRevenueRef);
+      if (!monthlyRevenueSnapshot.exists()) {
+        await setDoc(monthlyRevenueRef, {
+          totalRevenue: totalAmount,
+          revenueDetails: [
+            {
+              date: today,
+              orderAmount: totalAmount,
+            },
+          ],
+        });
+      } else {
+        await updateDoc(monthlyRevenueRef, {
+          totalRevenue: increment(totalAmount),
+          revenueDetails: arrayUnion({
+            date: today,
+            orderAmount: totalAmount,
+          }),
+        });
+      }
+
+      // Yearly Revenue (Format: YYYY)
+      const yearKey = `${today.getFullYear()}`;
+      const yearlyRevenueRef = doc(firestore, "yearlyRevenue", yearKey);
+      const yearlyRevenueSnapshot = await getDoc(yearlyRevenueRef);
+      if (!yearlyRevenueSnapshot.exists()) {
+        await setDoc(yearlyRevenueRef, {
+          totalRevenue: totalAmount,
+          revenueDetails: [
+            {
+              date: today,
+              orderAmount: totalAmount,
+            },
+          ],
+        });
+      } else {
+        await updateDoc(yearlyRevenueRef, {
+          totalRevenue: increment(totalAmount),
+          revenueDetails: arrayUnion({
+            date: today,
+            orderAmount: totalAmount,
+          }),
+        });
+      }
+
+      // Overall Revenue (Total revenue)
       const revenueDocRef = doc(firestore, "revenue", "total");
       const revenueDocSnapshot = await getDoc(revenueDocRef);
 
       if (!revenueDocSnapshot.exists()) {
-        // If the document doesn't exist, create it
         await setDoc(revenueDocRef, {
           totalRevenue: totalAmount,
         });
       } else {
-        // If the document exists, increment the totalRevenue
         await updateDoc(revenueDocRef, {
-          totalRevenue: increment(totalAmount), // Correct usage of increment
+          totalRevenue: increment(totalAmount),
         });
       }
 
@@ -241,43 +377,101 @@ export default function AddOrder() {
                 </div>
               </div>
 
-              {/* Quantity Input */}
+              {/* Quantity Controls */}
               <div className="flex items-center mt-2">
                 <label htmlFor="quantity" className="mr-2 text-gray-700">
                   Quantity:
                 </label>
+                <button
+                  onClick={decreaseQuantity}
+                  className="px-4 py-2 border border-gray-300 rounded-l-md bg-gray-200 hover:bg-gray-300"
+                >
+                  -
+                </button>
                 <input
                   type="number"
                   id="quantity"
                   value={quantity}
-                  onChange={handleQuantityChange}
-                  className="w-16 p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+                  onChange={(e) => setQuantity(parseInt(e.target.value) || 1)}
+                  className="w-16 p-2 border-t border-b border-gray-300 text-center"
                   min="1"
                   max={selectedProduct.stock}
                 />
+                <button
+                  onClick={increaseQuantity}
+                  className="px-4 py-2 border border-gray-300 rounded-r-md bg-gray-200 hover:bg-gray-300"
+                >
+                  +
+                </button>
               </div>
             </div>
           )}
 
-          {/* Display message if no product is selected */}
-          {!selectedProduct && (
-            <div className="text-center text-gray-600">
-              Please select a product to place an order.
+          {/* Order Type Selection */}
+          <div>
+            <label className="block text-lg font-semibold">Order Type:</label>
+            <div className="flex items-center space-x-4">
+              <label>
+                <input
+                  type="radio"
+                  value="Dine-in"
+                  checked={orderType === "Dine-in"}
+                  onChange={handleOrderTypeChange}
+                  className="mr-2"
+                />
+                Dine-in
+              </label>
+              <label>
+                <input
+                  type="radio"
+                  value="Take-out"
+                  checked={orderType === "Take-out"}
+                  onChange={handleOrderTypeChange}
+                  className="mr-2"
+                />
+                Take-out
+              </label>
             </div>
-          )}
+          </div>
+
+          {/* Payment Method Selection */}
+          <div>
+            <label className="block text-lg font-semibold">
+              Payment Method:
+            </label>
+            <div className="flex items-center space-x-4">
+              <label>
+                <input
+                  type="radio"
+                  value="Cash"
+                  checked={paymentMethod === "Cash"}
+                  onChange={handlePaymentMethodChange}
+                  className="mr-2"
+                />
+                Cash
+              </label>
+              <label>
+                <input
+                  type="radio"
+                  value="GCash"
+                  checked={paymentMethod === "GCash"}
+                  onChange={handlePaymentMethodChange}
+                  className="mr-2"
+                />
+                GCash
+              </label>
+            </div>
+          </div>
+
+          {/* Order Button */}
+          <button
+            onClick={handleAddOrder}
+            className="flex items-center mt-6 px-6 py-3 bg-[#724E2C] text-white font-semibold rounded-md hover:bg-blue-[#724E2C]"
+          >
+            <FaShoppingCart className="mr-2" /> Add Order
+          </button>
         </div>
       )}
-
-      {/* Button to place the order */}
-      <div className="mt-6 flex justify-center">
-        <button
-          onClick={handleAddOrder}
-          className="flex items-center justify-center px-6 py-3 bg-[#724E2C] text-white rounded-lg cursor-pointer hover:bg-[#ac927a] transition-all duration-200"
-        >
-          <FaShoppingCart className="mr-2" />
-          Place Order
-        </button>
-      </div>
     </div>
   );
 }

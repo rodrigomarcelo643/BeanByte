@@ -176,7 +176,7 @@ export default function Products() {
       status: "Pending",
       timestamp: new Date(),
       referenceNumber: orderReference,
-      paymentReference, // Add payment reference ID to the order
+      paymentReference,
       fullName,
       contactNumber,
       address,
@@ -190,26 +190,20 @@ export default function Products() {
           addDoc(collection(firestore, "customerorders"), order)
         )
       );
-
-      // Remove cart items from Firestore after successful order placement
       const cartsSnapshot = await getDocs(collection(firestore, "carts"));
       const cartDocs = cartsSnapshot.docs.filter((doc) =>
         cart.some((item) => item.id === doc.data().productId)
       );
 
-      await Promise.all(
-        cartDocs.map((doc) => deleteDoc(doc.ref)) // Delete cart documents
-      );
+      await Promise.all(cartDocs.map((doc) => deleteDoc(doc.ref)));
 
       Swal.fire({
         icon: "success",
         title: "Order Placed",
         text: `Your order has been placed successfully! Reference Number: ${orderReference} Payment Reference: ${paymentReference}. Your Order will arrive within one hour or less than an hour `,
       });
-
-      // Clear the cart after the order is placed
       setCart([]);
-      setShowCartModal(false); // Close the modal
+      setShowCartModal(false);
     } catch (error) {
       console.error("Error placing order: ", error);
       Swal.fire({
