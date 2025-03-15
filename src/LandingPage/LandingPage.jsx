@@ -80,7 +80,7 @@ const LandingPage = () => {
       {/* Top Navbar */}
       <div className="bg-white bg-opacity-50 py-4 px-8 flex justify-between items-center fixed w-full top-0 left-0 z-10">
         <div className="text-2xl font-bold text-brown-600">
-          <img src={logo} className="w-30 h-18" alt="Logo" />
+          <img src={logo} className="w-23 h-20" alt="Logo" />
         </div>
 
         {/* Centered Navbar Links (Visible on larger screens) */}

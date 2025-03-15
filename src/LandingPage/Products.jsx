@@ -28,6 +28,7 @@ export default function Products() {
     address: "",
     paymentMode: "",
     paymentReference: "", // Store the payment reference input
+    pickupOrTakeout: "", // New field to store pickup or takeout choice
   });
   const [orderReference, setOrderReference] = useState(null); // Store reference number
 
@@ -150,15 +151,22 @@ export default function Products() {
   };
 
   const handleFinalizeOrder = async () => {
-    const { fullName, contactNumber, address, paymentMode, paymentReference } =
-      checkoutDetails;
+    const {
+      fullName,
+      contactNumber,
+      address,
+      paymentMode,
+      paymentReference,
+      pickupOrTakeout,
+    } = checkoutDetails;
 
     if (
       !fullName ||
       !contactNumber ||
       !address ||
       !paymentMode ||
-      !paymentReference
+      !paymentReference ||
+      !pickupOrTakeout // Check if pickupOrTakeout is selected
     ) {
       Swal.fire({
         icon: "warning",
@@ -181,6 +189,7 @@ export default function Products() {
       contactNumber,
       address,
       paymentMode,
+      pickupOrTakeout, // Add the pickupOrTakeout option here
     }));
 
     // Add orders to Firestore
@@ -200,7 +209,7 @@ export default function Products() {
       Swal.fire({
         icon: "success",
         title: "Order Placed",
-        text: `Your order has been placed successfully! Reference Number: ${orderReference} Payment Reference: ${paymentReference}. Your Order will arrive within one hour or less than an hour `,
+        text: `Your order has been placed successfully! Reference Number: ${orderReference} Payment Reference: ${paymentReference}. Your Order will arrive within one hour or less than an hour.`,
       });
       setCart([]);
       setShowCartModal(false);
@@ -278,7 +287,7 @@ export default function Products() {
                 <img
                   src={product.imageUrl}
                   alt={product.productName}
-                  className="w-30 h-50 object-cover rounded-md"
+                  className="w-full h-50 object-cover rounded-md"
                 />
               </div>
 
@@ -449,6 +458,22 @@ export default function Products() {
                     }
                     className="w-full px-4 py-2 border border-gray-300 rounded-md"
                   />
+
+                  {/* Pickup or Takeout Selection */}
+                  <select
+                    value={checkoutDetails.pickupOrTakeout}
+                    onChange={(e) =>
+                      setCheckoutDetails({
+                        ...checkoutDetails,
+                        pickupOrTakeout: e.target.value,
+                      })
+                    }
+                    className="w-full px-4 py-2 border border-gray-300 rounded-md"
+                  >
+                    <option value="">Select Pickup or Takeout</option>
+                    <option value="Pickup">Pickup</option>
+                    <option value="Takeout">Takeout</option>
+                  </select>
                 </div>
                 <button
                   onClick={handleFinalizeOrder}

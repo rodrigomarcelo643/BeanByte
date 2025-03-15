@@ -267,7 +267,7 @@ export default function ViewProducts() {
                 <img
                   src={product.imageUrl}
                   alt={product.productName}
-                  className="w-30 h-50 object-cover rounded-md"
+                  className="w-full mt-8 h-50 object-cover rounded-md"
                 />
               </div>
 

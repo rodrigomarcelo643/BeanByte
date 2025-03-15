@@ -180,7 +180,7 @@ export function Sidebar() {
           </button>
         </div>
         <div className="sticky top-0 pt-6 pb-4 mb-2">
-          <img src={logo} className="w-40 h-25 mx-auto" />
+          <img src={logo} className="w-30 h-25 mx-auto" />
         </div>
 
         <List className="overflow-y-auto flex-1">
@@ -219,15 +219,6 @@ export function Sidebar() {
                     <ChevronDownIcon strokeWidth={3} className="h-3 w-5" />
                   </ListItemPrefix>
                   <Typography>Analytics</Typography>
-                </ListItem>
-                <ListItem
-                  className="cursor-pointer"
-                  onClick={() => updateContent("Reporting")}
-                >
-                  <ListItemPrefix>
-                    <ChevronDownIcon strokeWidth={3} className="h-3 w-5" />
-                  </ListItemPrefix>
-                  <Typography>Reporting</Typography>
                 </ListItem>
               </List>
             </AccordionBody>
