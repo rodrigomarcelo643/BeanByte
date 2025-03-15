@@ -1,8 +1,18 @@
 import React, { useState, useEffect } from "react";
 import { firestore } from "../../config/firebase";
-import { collection, getDocs, doc, updateDoc } from "firebase/firestore";
+import {
+  collection,
+  getDocs,
+  doc,
+  updateDoc,
+  deleteDoc,
+  query,
+  where,
+  setDoc,
+} from "firebase/firestore";
 import Swal from "sweetalert2";
 import { FaTimesCircle } from "react-icons/fa";
+
 export default function Orders() {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -34,16 +44,85 @@ export default function Orders() {
     }
   };
 
-  // Update order status to "Accepted"
-  const acceptOrder = async (orderId) => {
+  // Fetch product details from the products collection based on productName
+  const fetchProduct = async (productName) => {
+    try {
+      const productRef = collection(firestore, "products");
+      const q = query(productRef, where("productName", "==", productName));
+      const querySnapshot = await getDocs(q);
+      if (!querySnapshot.empty) {
+        const productDoc = querySnapshot.docs[0];
+        return productDoc;
+      }
+      return null;
+    } catch (error) {
+      console.error("Error fetching product: ", error);
+      return null;
+    }
+  };
+
+  const acceptOrder = async (orderId, ordersForReference) => {
     try {
       const orderRef = doc(firestore, "customerorders", orderId);
-      await updateDoc(orderRef, { status: "Accepted" });
-      fetchOrders(); // Re-fetch orders to update UI
+
+      // Check product stock and update the stock
+      for (let order of ordersForReference) {
+        const product = await fetchProduct(order.product);
+        if (product) {
+          const productStock = parseInt(product.data().stock);
+          const orderedQuantity = order.quantity;
+
+          // Check if enough stock is available
+          if (productStock < orderedQuantity) {
+            Swal.fire({
+              icon: "error",
+              title: "Insufficient Stock",
+              text: `Not enough stock for ${order.product}. Only ${productStock} available.`,
+            });
+            return;
+          }
+
+          // Reduce the stock and update the Firestore product document
+          await updateDoc(doc(firestore, "products", product.id), {
+            stock: productStock - orderedQuantity,
+          });
+        }
+      }
+
+      // Create a payment history document with all the products in one document
+      const paymentHistoryRef = doc(
+        collection(firestore, "paymentHistory"),
+        orderId
+      );
+
+      const orderDetails = ordersForReference.map((order) => ({
+        product: order.product,
+        quantity: order.quantity,
+        price: order.price,
+        total: order.price * order.quantity,
+      }));
+
+      await setDoc(paymentHistoryRef, {
+        customer: ordersForReference[0].fullName,
+        address: ordersForReference[0].address,
+        contactNumber: ordersForReference[0].contactNumber,
+        paymentMode: ordersForReference[0].paymentMode,
+        status: "Accepted",
+        orderDetails: orderDetails,
+        totalPrice: orderDetails.reduce((acc, item) => acc + item.total, 0),
+        paymentProofUrl: ordersForReference[0].paymentProofUrl || "",
+        timestamp: new Date(),
+      });
+
+      // Delete the accepted order from the "customerorders" collection
+      await deleteDoc(orderRef);
+
+      // Re-fetch orders to update UI
+      fetchOrders();
       Swal.fire({
         icon: "success",
         title: "Order Accepted",
-        text: "The order has been accepted successfully.",
+        text: "The order has been accepted and moved to payment history.",
       });
     } catch (error) {
       console.error("Error accepting order: ", error);
@@ -206,7 +285,10 @@ export default function Orders() {
                             confirmButtonText: "Yes, accept it!",
                           }).then((result) => {
                             if (result.isConfirmed) {
-                              acceptOrder(ordersForReference[0].id);
+                              acceptOrder(
+                                ordersForReference[0].id,
+                                ordersForReference
+                              );
                             }
                           });
                         }}
@@ -291,6 +373,7 @@ export default function Orders() {
                   </div>
                 ))}
               </div>
+
               {/* Customer Information */}
               <div className="flex space-x-8">
                 <div className="flex-1 border-b border-dashed border-gray-300 pb-6">
@@ -331,40 +414,35 @@ export default function Orders() {
                     <span>Payment Information</span>
                   </h3>
                   <div className="flex items-center space-x-3 mb-3">
-                    <i className="fas fa-credit-card-front text-gray-500"></i>
+                    <i className="fas fa-credit-card text-gray-500"></i>
                     <p className="text-sm">
                       <strong>Payment Mode:</strong> {viewOrder[0].paymentMode}
                     </p>
                   </div>
+                  {viewOrder[0].paymentProofUrl && (
+                    <div className="flex items-center space-x-3">
+                      <i className="fas fa-image text-gray-500"></i>
+                      <a
+                        href={viewOrder[0].paymentProofUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-sm text-blue-500 hover:underline"
+                      >
+                        View Payment Proof
+                      </a>
+                    </div>
+                  )}
                 </div>
               </div>
-              {/* Display Payment Proof if available */}
-              {viewOrder[0].paymentProofUrl && (
-                <div className="border-b border-dashed border-gray-300 pb-6">
-                  <h3 className="text-xl font-semibold mb-4 flex items-center space-x-3">
-                    <i className="fas fa-credit-card text-gray-600"></i>
-                    <span>Payment Proof</span>
-                  </h3>
-                  <img
-                    src={viewOrder[0].paymentProofUrl}
-                    alt="Payment Proof"
-                    className="w-55 max-w-md h-90 rounded-lg"
-                  />
-                </div>
-              )}
 
-              {/* Total Order Price */}
-              <div className="border-b border-dashed border-gray-300 pb-4 flex items-center space-x-4">
-                <i className="fas fa-credit-card text-gray-600"></i>
-                <p className="text-lg">
-                  <strong>Total Order Price:</strong> ₱{" "}
-                  {viewOrder
-                    .reduce(
-                      (acc, order) => acc + order.price * order.quantity,
-                      0
-                    )
-                    .toFixed(2)}
-                </p>
+              {/* Close Button */}
+              <div className="text-center mt-6">
+                <button
+                  onClick={handleCloseModal}
+                  className="bg-gray-500 text-white py-2 px-6 rounded-lg hover:bg-gray-600 transition"
+                >
+                  Close
+                </button>
               </div>
             </div>
           </div>

@@ -353,15 +353,6 @@ export function Sidebar() {
               <List className="p-0">
                 <ListItem
                   className="cursor-pointer"
-                  onClick={() => updateContent("Payments")}
-                >
-                  <ListItemPrefix>
-                    <ChevronDownIcon strokeWidth={3} className="h-3 w-5" />
-                  </ListItemPrefix>
-                  <Typography>Payments</Typography>
-                </ListItem>
-                <ListItem
-                  className="cursor-pointer"
                   onClick={() => updateContent("PaymentHistory")}
                 >
                   <ListItemPrefix>

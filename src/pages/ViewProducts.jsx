@@ -11,7 +11,7 @@ import {
 } from "firebase/firestore";
 import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import Swal from "sweetalert2";
-import { FaEdit, FaTrashAlt } from "react-icons/fa"; // Added icons for edit and delete buttons
+import { FaEdit, FaTrashAlt } from "react-icons/fa";
 
 export default function ViewProducts() {
   const [products, setProducts] = useState([]);
@@ -39,7 +39,6 @@ export default function ViewProducts() {
         where("userId", "==", userId)
       );
       const querySnapshot = await getDocs(q);
-
       const productsList = querySnapshot.docs.map((doc) => ({
         id: doc.id,
         ...doc.data(),
@@ -120,7 +119,7 @@ export default function ViewProducts() {
           <input id="productName" class="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500" placeholder="Product Name" value="${product.productName}" />
           <input id="price" class="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500" placeholder="Price" value="${product.price}" />
           <input id="stock" class="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500" placeholder="Stock" value="${product.stock}" />
-
+          <input id="product-description" class="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500" placeholder="Stock" value="${product.description}" />
           <div class="upload-container flex items-center justify-between space-x-4">
             <input type="file" id="imageFile" class="upload-input hidden" />
             <label for="imageFile" class="upload-label cursor-pointer text-gray-700 border-2 border-gray-300 px-4 py-2 rounded-md hover:bg-gray-200 transition-all">
@@ -139,6 +138,7 @@ export default function ViewProducts() {
         return {
           productName: document.getElementById("productName").value,
           price: document.getElementById("price").value,
+          description: document.getElementById("product-description").value,
           stock: document.getElementById("stock").value,
           imageFile: document.getElementById("imageFile").files[0],
         };
@@ -146,7 +146,7 @@ export default function ViewProducts() {
     });
 
     if (formValues) {
-      const { productName, price, stock, imageFile } = formValues;
+      const { productName, description, price, stock, imageFile } = formValues;
 
       // Update product with new values
       let newImageUrl = product.imageUrl;
@@ -175,6 +175,7 @@ export default function ViewProducts() {
           productName: productName || product.productName,
           price: parseFloat(price) || product.price,
           stock: parseInt(stock) || product.stock,
+          description: description || product.description,
           imageUrl: newImageUrl || product.imageUrl,
         });
 
