@@ -2,11 +2,12 @@ import React, { useState, useEffect } from "react";
 import { firestore } from "../../config/firebase";
 import { collection, getDocs, doc, updateDoc } from "firebase/firestore";
 import Swal from "sweetalert2";
-
+import { FaTimesCircle } from "react-icons/fa";
 export default function Orders() {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [viewOrder, setViewOrder] = useState(null); // To store selected order details for modal
+  const [activeTab, setActiveTab] = useState("Pickup"); // Active tab (default is Pickup)
 
   // Fetch orders from Firestore
   const fetchOrders = async () => {
@@ -99,6 +100,11 @@ export default function Orders() {
     setViewOrder(null);
   };
 
+  // Handle tab change
+  const handleTabChange = (tab) => {
+    setActiveTab(tab);
+  };
+
   useEffect(() => {
     fetchOrders();
   }, []);
@@ -112,6 +118,23 @@ export default function Orders() {
         Customer Orders
       </h1>
 
+      {/* Tabs for Pickup, Dine In, and Takeout */}
+      <div className="flex justify-center mb-4">
+        {["Pickup", "Dine In", "Takeout"].map((tab) => (
+          <button
+            key={tab}
+            className={`px-6 py-2 mx-2 text-lg font-semibold rounded-t-md transition-all ${
+              activeTab === tab
+                ? "text-white bg-[#724E2C] border-b-4 border-[#724E2C]"
+                : "text-gray-600 bg-gray-200 hover:bg-gray-300"
+            }`}
+            onClick={() => handleTabChange(tab)}
+          >
+            {tab}
+          </button>
+        ))}
+      </div>
+
       {loading ? (
         <div className="flex justify-center items-center text-lg">
           Loading...
@@ -123,8 +146,6 @@ export default function Orders() {
           <table className="min-w-full table-auto bg-white border-collapse">
             <thead>
               <tr className="text-white bg-[#724E2C]">
-                <th className="py-3 px-4 text-left">Order ID</th>
-
                 <th className="py-3 px-4 text-left">Customer</th>
                 <th className="py-3 px-4 text-left">Total Price</th>
                 <th className="py-3 px-4 text-left">Status</th>
@@ -139,13 +160,15 @@ export default function Orders() {
                   0
                 );
 
+                // Filter orders by active tab
+                if (ordersForReference[0].pickupOrTakeout !== activeTab)
+                  return null;
+
                 return (
                   <tr
                     key={referenceNumber}
                     className="border-b hover:bg-gray-100 transition duration-200"
                   >
-                    <td className="py-3 px-4">{referenceNumber}</td>
-
                     <td className="py-3 px-4">
                       {ordersForReference[0].fullName}
                     </td>
@@ -225,9 +248,9 @@ export default function Orders() {
           <div className="bg-white p-8 max-w-4xl w-full h-full rounded-lg shadow-lg overflow-auto">
             <button
               onClick={handleCloseModal}
-              className="text-xl text-gray-500 float-right"
+              className="text-xl text-gray-500 cursor-pointer float-right"
             >
-              X
+              <FaTimesCircle />
             </button>
 
             <h2 className="text-2xl font-bold mb-6">Order Details</h2>
@@ -236,9 +259,6 @@ export default function Orders() {
               {/* Reference Number */}
               <div className="border-b border-dashed border-gray-300 pb-4 flex items-center space-x-4">
                 <i className="fas fa-hashtag text-gray-600"></i>
-                <p className="text-lg">
-                  <strong>Order Id:</strong> {viewOrder[0].referenceNumber}
-                </p>
               </div>
 
               {/* Product Details */}
@@ -271,21 +291,6 @@ export default function Orders() {
                   </div>
                 ))}
               </div>
-
-              {/* Total Order Price */}
-              <div className="border-b border-dashed border-gray-300 pb-4 flex items-center space-x-4">
-                <i className="fas fa-credit-card text-gray-600"></i>
-                <p className="text-lg">
-                  <strong>Total Order Price:</strong> ₱{" "}
-                  {viewOrder
-                    .reduce(
-                      (acc, order) => acc + order.price * order.quantity,
-                      0
-                    )
-                    .toFixed(2)}
-                </p>
-              </div>
-
               {/* Customer Information */}
               <div className="flex space-x-8">
                 <div className="flex-1 border-b border-dashed border-gray-300 pb-6">
@@ -331,14 +336,35 @@ export default function Orders() {
                       <strong>Payment Mode:</strong> {viewOrder[0].paymentMode}
                     </p>
                   </div>
-                  <div className="flex items-center space-x-3">
-                    <i className="fas fa-file-invoice text-gray-500"></i>
-                    <p className="text-sm">
-                      <strong>Payment Reference:</strong>{" "}
-                      {viewOrder[0].paymentReference}
-                    </p>
-                  </div>
                 </div>
+              </div>
+              {/* Display Payment Proof if available */}
+              {viewOrder[0].paymentProofUrl && (
+                <div className="border-b border-dashed border-gray-300 pb-6">
+                  <h3 className="text-xl font-semibold mb-4 flex items-center space-x-3">
+                    <i className="fas fa-credit-card text-gray-600"></i>
+                    <span>Payment Proof</span>
+                  </h3>
+                  <img
+                    src={viewOrder[0].paymentProofUrl}
+                    alt="Payment Proof"
+                    className="w-55 max-w-md h-90 rounded-lg"
+                  />
+                </div>
+              )}
+
+              {/* Total Order Price */}
+              <div className="border-b border-dashed border-gray-300 pb-4 flex items-center space-x-4">
+                <i className="fas fa-credit-card text-gray-600"></i>
+                <p className="text-lg">
+                  <strong>Total Order Price:</strong> ₱{" "}
+                  {viewOrder
+                    .reduce(
+                      (acc, order) => acc + order.price * order.quantity,
+                      0
+                    )
+                    .toFixed(2)}
+                </p>
               </div>
             </div>
           </div>

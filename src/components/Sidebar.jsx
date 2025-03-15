@@ -236,6 +236,54 @@ export function Sidebar() {
               />
             }
           >
+            {/* Orders Accordion */}
+            <Accordion
+              open={open === 5}
+              icon={
+                <ChevronDownIcon
+                  strokeWidth={2.5}
+                  className={`mx-auto h-4 w-4 transition-transform ${
+                    open === 4 ? "rotate-180" : ""
+                  }`}
+                />
+              }
+            >
+              <ListItem className="p-0" selected={open === 4}>
+                <AccordionHeader
+                  onClick={() => handleOpen(5)}
+                  className="border-b-0 p-3"
+                >
+                  <ListItemPrefix>
+                    <img src={ordersIcon} className="h-6 w-6 text-[#724E2C]" />
+                  </ListItemPrefix>
+                  <Typography color="blue-gray" className="mr-auto font-normal">
+                    Orders
+                  </Typography>
+                </AccordionHeader>
+              </ListItem>
+              <AccordionBody className="py-1">
+                <List className="p-0">
+                  <ListItem
+                    className="cursor-pointer"
+                    onClick={() => updateContent("AddOrder")}
+                  >
+                    <ListItemPrefix>
+                      <ChevronDownIcon strokeWidth={3} className="h-3 w-5" />
+                    </ListItemPrefix>
+                    <Typography>Add Orders </Typography>
+                  </ListItem>
+                  <ListItem
+                    className="cursor-pointer"
+                    onClick={() => updateContent("Orders")}
+                  >
+                    <ListItemPrefix>
+                      <ChevronDownIcon strokeWidth={3} className="h-3 w-5" />
+                    </ListItemPrefix>
+                    <Typography>Manage Orders</Typography>
+                  </ListItem>
+                </List>
+              </AccordionBody>
+            </Accordion>
             <ListItem className="p-0" selected={open === 2}>
               <AccordionHeader
                 onClick={() => handleOpen(2)}
@@ -320,55 +368,6 @@ export function Sidebar() {
                     <ChevronDownIcon strokeWidth={3} className="h-3 w-5" />
                   </ListItemPrefix>
                   <Typography>PaymentHistory</Typography>
-                </ListItem>
-              </List>
-            </AccordionBody>
-          </Accordion>
-
-          {/* Orders Accordion */}
-          <Accordion
-            open={open === 5}
-            icon={
-              <ChevronDownIcon
-                strokeWidth={2.5}
-                className={`mx-auto h-4 w-4 transition-transform ${
-                  open === 4 ? "rotate-180" : ""
-                }`}
-              />
-            }
-          >
-            <ListItem className="p-0" selected={open === 4}>
-              <AccordionHeader
-                onClick={() => handleOpen(5)}
-                className="border-b-0 p-3"
-              >
-                <ListItemPrefix>
-                  <img src={ordersIcon} className="h-6 w-6 text-[#724E2C]" />
-                </ListItemPrefix>
-                <Typography color="blue-gray" className="mr-auto font-normal">
-                  Orders
-                </Typography>
-              </AccordionHeader>
-            </ListItem>
-            <AccordionBody className="py-1">
-              <List className="p-0">
-                <ListItem
-                  className="cursor-pointer"
-                  onClick={() => updateContent("AddOrder")}
-                >
-                  <ListItemPrefix>
-                    <ChevronDownIcon strokeWidth={3} className="h-3 w-5" />
-                  </ListItemPrefix>
-                  <Typography>Add Orders </Typography>
-                </ListItem>
-                <ListItem
-                  className="cursor-pointer"
-                  onClick={() => updateContent("Orders")}
-                >
-                  <ListItemPrefix>
-                    <ChevronDownIcon strokeWidth={3} className="h-3 w-5" />
-                  </ListItemPrefix>
-                  <Typography>Manage Orders</Typography>
                 </ListItem>
               </List>
             </AccordionBody>

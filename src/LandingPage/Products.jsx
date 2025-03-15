@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { firestore } from "../../config/firebase";
+import { firestore, storage } from "../../config/firebase"; // Make sure to import Firebase Storage
 import {
   collection,
   getDocs,
@@ -8,8 +8,9 @@ import {
   deleteDoc,
 } from "firebase/firestore";
 import Swal from "sweetalert2";
-import { FaShoppingCart } from "react-icons/fa";
-import { v4 as uuidv4 } from "uuid"; // To generate reference number
+import { FaShoppingCart, FaTimesCircle } from "react-icons/fa";
+import { v4 as uuidv4 } from "uuid";
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage"; // Add Firebase storage imports
 
 export default function Products() {
   const [products, setProducts] = useState([]);
@@ -19,18 +20,18 @@ export default function Products() {
   const [category, setCategory] = useState("");
   const [categories, setCategories] = useState([]);
   const [quantities, setQuantities] = useState({});
-  const [cart, setCart] = useState([]); // Cart state
-  const [showCartModal, setShowCartModal] = useState(false); // Show cart modal
-  const [step, setStep] = useState(1); // Modal step (1 for order details, 2 for checkout form)
+  const [cart, setCart] = useState([]);
+  const [showCartModal, setShowCartModal] = useState(false);
+  const [step, setStep] = useState(1);
   const [checkoutDetails, setCheckoutDetails] = useState({
     fullName: "",
     contactNumber: "",
     address: "",
     paymentMode: "",
-    paymentReference: "", // Store the payment reference input
-    pickupOrTakeout: "", // New field to store pickup or takeout choice
+    pickupOrTakeout: "",
   });
-  const [orderReference, setOrderReference] = useState(null); // Store reference number
+  const [orderReference, setOrderReference] = useState(null);
+  const [paymentProof, setPaymentProof] = useState(null);
 
   const fetchProducts = async () => {
     setLoading(true);
@@ -145,28 +146,28 @@ export default function Products() {
       });
       return;
     }
-    setOrderReference(uuidv4()); // Generate unique order reference
-    setStep(1); // Set the modal to the first step (order details)
-    setShowCartModal(true); // Open the modal for checkout
+    setOrderReference(uuidv4());
+    setStep(1);
+    setShowCartModal(true);
+  };
+
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setPaymentProof(file);
+    }
   };
 
   const handleFinalizeOrder = async () => {
-    const {
-      fullName,
-      contactNumber,
-      address,
-      paymentMode,
-      paymentReference,
-      pickupOrTakeout,
-    } = checkoutDetails;
+    const { fullName, contactNumber, address, paymentMode, pickupOrTakeout } =
+      checkoutDetails;
 
     if (
       !fullName ||
       !contactNumber ||
       !address ||
       !paymentMode ||
-      !paymentReference ||
-      !pickupOrTakeout // Check if pickupOrTakeout is selected
+      !pickupOrTakeout
     ) {
       Swal.fire({
         icon: "warning",
@@ -174,6 +175,13 @@ export default function Products() {
         text: "Please fill out all the fields.",
       });
       return;
+    }
+
+    let paymentProofUrl = null;
+    if (paymentProof) {
+      const storageRef = ref(storage, `paymentProofs/${orderReference}`);
+      const uploadSnapshot = await uploadBytes(storageRef, paymentProof);
+      paymentProofUrl = await getDownloadURL(uploadSnapshot.ref);
     }
 
     const orderDetails = cart.map((product) => ({
@@ -184,15 +192,14 @@ export default function Products() {
       status: "Pending",
       timestamp: new Date(),
       referenceNumber: orderReference,
-      paymentReference,
+      paymentMode,
       fullName,
       contactNumber,
       address,
-      paymentMode,
-      pickupOrTakeout, // Add the pickupOrTakeout option here
+      pickupOrTakeout,
+      paymentProofUrl,
     }));
 
-    // Add orders to Firestore
     try {
       await Promise.all(
         orderDetails.map((order) =>
@@ -209,9 +216,19 @@ export default function Products() {
       Swal.fire({
         icon: "success",
         title: "Order Placed",
-        text: `Your order has been placed successfully! Reference Number: ${orderReference} Payment Reference: ${paymentReference}. Your Order will arrive within one hour or less than an hour.`,
+        text: `Your order has been placed successfully!. Your Order will arrive within one hour or less.`,
       });
+
+      // Reset all states after placing the order
       setCart([]);
+      setCheckoutDetails({
+        fullName: "",
+        contactNumber: "",
+        address: "",
+        paymentMode: "",
+        pickupOrTakeout: "",
+      });
+      setPaymentProof(null);
       setShowCartModal(false);
     } catch (error) {
       console.error("Error placing order: ", error);
@@ -225,7 +242,7 @@ export default function Products() {
 
   const handleCloseModal = () => {
     setShowCartModal(false);
-    setStep(1); // Reset to the first step when the modal is closed
+    setStep(1);
   };
 
   useEffect(() => {
@@ -282,7 +299,6 @@ export default function Products() {
               key={product.id}
               className="bg-white p-4 rounded-lg shadow-lg w-full sm:w-[280px] md:w-[300px] lg:w-[320px] xl:w-[350px] relative"
             >
-              {/* Product Image */}
               <div className="flex justify-center mb-4">
                 <img
                   src={product.imageUrl}
@@ -291,22 +307,18 @@ export default function Products() {
                 />
               </div>
 
-              {/* Product Name */}
               <h3 className="text-2xl text-center font-semibold text-[#724E2C] truncate">
                 {product.productName}
               </h3>
 
-              {/* Product Price */}
               <p className="text-[#724E2C] text-center mt-2">
                 ₱ {parseFloat(product.price).toFixed(2)}
               </p>
 
-              {/* Product Description */}
               <p className="text-gray-600 mt-1 text-center">
                 {product.description}
               </p>
 
-              {/* Quantity Controls */}
               <div className="flex items-center mt-4 justify-center space-x-2">
                 <button
                   onClick={() => handleQuantityChange(product.id, "decrease")}
@@ -323,7 +335,6 @@ export default function Products() {
                 </button>
               </div>
 
-              {/* Add to Cart Button */}
               <button
                 onClick={() => addToCart(product)}
                 className="mt-4 w-full py-2 bg-[#724E2C] text-white font-bold rounded-md hover:bg-[#6a3a22] transition-all"
@@ -336,25 +347,23 @@ export default function Products() {
         </div>
       )}
 
-      {/* Cart Button */}
       <div
         className="fixed bottom-8 right-8 bg-[#724E2C] text-white p-4 w-[80px] h-[80px] rounded-full shadow-lg cursor-pointer flex items-center justify-center flex-col"
         onClick={handleCheckout}
       >
-        <span className="text-sm">{cart.length}</span> {/* Bigger number */}
-        <FaShoppingCart size={40} /> {/* Bigger cart icon */}
+        <span className="text-sm">{cart.length}</span>
+        <FaShoppingCart size={40} />
       </div>
 
       {/* Cart Modal */}
       {showCartModal && (
-        <div className="fixed inset-0 bg-[rgba(0,0,0,0.1)] flex justify-center items-center z-10">
-          <div className="bg-white p-6 w-[100%] md:w-[100%] h-full ">
-            {/* Close Modal Button */}
+        <div className="fixed inset-0 bg-[rgba(0,0,0,0.1)] flex justify-center overflow-y-scroll items-center z-10">
+          <div className="bg-white p-6 w-[100%] md:w-[100%] h-full">
             <button
               onClick={handleCloseModal}
               className="absolute top-2 right-2 text-xl text-gray-500"
             >
-              X
+              <FaTimesCircle />
             </button>
 
             {step === 1 ? (
@@ -391,8 +400,6 @@ export default function Products() {
             ) : (
               <>
                 <h2 className="text-2xl font-bold mb-4">Checkout</h2>
-
-                {/* Checkout Form */}
                 <div className="space-y-4">
                   <input
                     type="text"
@@ -445,21 +452,30 @@ export default function Products() {
                     <option value="Cash on Delivery">Cash on Delivery</option>
                   </select>
 
-                  {/* Payment Reference Input */}
-                  <input
-                    type="text"
-                    placeholder="Payment Reference Number"
-                    value={checkoutDetails.paymentReference}
-                    onChange={(e) =>
-                      setCheckoutDetails({
-                        ...checkoutDetails,
-                        paymentReference: e.target.value,
-                      })
-                    }
-                    className="w-full px-4 py-2 border border-gray-300 rounded-md"
-                  />
+                  {/* Image upload for proof of payment */}
+                  {checkoutDetails.paymentMode &&
+                    checkoutDetails.paymentMode !== "Cash on Delivery" && (
+                      <div className="mt-4">
+                        <label className="block text-gray-600">
+                          Upload Payment Proof
+                        </label>
+                        <input
+                          type="file"
+                          onChange={handleFileChange}
+                          className="w-full mt-2 p-4 border-dashed border-2 rounded-md"
+                        />
+                        {paymentProof && (
+                          <div className="mt-2">
+                            <img
+                              src={URL.createObjectURL(paymentProof)}
+                              alt="Payment Proof"
+                              className="w-30 h-30 object-cover rounded-md"
+                            />
+                          </div>
+                        )}
+                      </div>
+                    )}
 
-                  {/* Pickup or Takeout Selection */}
                   <select
                     value={checkoutDetails.pickupOrTakeout}
                     onChange={(e) =>
@@ -477,7 +493,7 @@ export default function Products() {
                 </div>
                 <button
                   onClick={handleFinalizeOrder}
-                  className="mt-4 w-full py-2 bg-[#724E2C] text-white font-bold rounded-md hover:bg-[#6a3a22]"
+                  className="mt-4 w-full py-2 mb-5 bg-[#724E2C] text-white font-bold rounded-md hover:bg-[#6a3a22]"
                 >
                   Finalize Order
                 </button>

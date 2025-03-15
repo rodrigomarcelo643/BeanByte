@@ -80,7 +80,7 @@ const AdminLogin = () => {
         {/* Left side (Login form) */}
         <div className="lg:w-1/2 xl:w-5/12 p-6 sm:p-12">
           <div className="flex justify-center items-center">
-            <img src={logo} className="w-auto" alt="Logo" />
+            <img src={logo} className="w-40 h-40" alt="Logo" />
           </div>
 
           <div className="mt-12 flex flex-col items-center">
