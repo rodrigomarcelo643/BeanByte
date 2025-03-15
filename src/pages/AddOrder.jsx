@@ -9,6 +9,7 @@ import {
   increment,
   getDoc,
   setDoc,
+  arrayUnion,
 } from "firebase/firestore";
 import Swal from "sweetalert2";
 import { FaShoppingCart } from "react-icons/fa"; // Shopping cart icon for the order button
@@ -144,8 +145,8 @@ export default function AddOrder() {
     const today = new Date();
 
     try {
-      // Record the order in Firestore under "revenueorders" collection
-      const orderRef = await addDoc(collection(firestore, "revenueorders"), {
+      // Record the order in Firestore under "OnsiteOrdering" collection
+      const orderRef = await addDoc(collection(firestore, "OnsiteOrdering"), {
         items: orderItems,
         totalAmount: totalAmount,
         status: "Pending",
@@ -414,8 +415,8 @@ export default function AddOrder() {
               <label>
                 <input
                   type="radio"
-                  value="Dine-in"
-                  checked={orderType === "Dine-in"}
+                  value="Dine In"
+                  checked={orderType === "Dine In"}
                   onChange={handleOrderTypeChange}
                   className="mr-2"
                 />
@@ -424,8 +425,8 @@ export default function AddOrder() {
               <label>
                 <input
                   type="radio"
-                  value="Take-out"
-                  checked={orderType === "Take-out"}
+                  value="Takeout"
+                  checked={orderType === "Takeout"}
                   onChange={handleOrderTypeChange}
                   className="mr-2"
                 />

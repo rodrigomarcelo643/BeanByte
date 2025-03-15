@@ -3,13 +3,16 @@ import { firestore } from "../../config/firebase";
 import { collection, getDocs } from "firebase/firestore";
 import Swal from "sweetalert2";
 import { FaTimesCircle } from "react-icons/fa";
+import OnsitePaymentHistory from "./OnsitePaymentHistory"; // Import your OnsitePaymentHistory component
 
 export default function PaymentHistory() {
   const [paymentHistory, setPaymentHistory] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [selectedPayment, setSelectedPayment] = useState(null); // To store the selected payment for viewing details
-  const [showPaymentProofModal, setShowPaymentProofModal] = useState(false); // Track the modal for payment proof
-  const [paymentProofUrl, setPaymentProofUrl] = useState(null); // Store the payment proof URL for the modal
+  const [selectedPayment, setSelectedPayment] = useState(null);
+  const [showPaymentProofModal, setShowPaymentProofModal] = useState(false);
+  const [paymentProofUrl, setPaymentProofUrl] = useState(null); // Fix: Declare state for paymentProofUrl
+  const [showOnsitePaymentHistory, setShowOnsitePaymentHistory] =
+    useState(false); // State to control visibility of OnsitePaymentHistory
 
   // Fetch payment history from Firestore
   const fetchPaymentHistory = async () => {
@@ -46,81 +49,108 @@ export default function PaymentHistory() {
 
   // Handle "View" button click to show full details
   const handleViewDetails = (payment) => {
-    setSelectedPayment(payment); // Store selected payment details
+    setSelectedPayment(payment);
   };
 
   // Handle "View Payment Proof" click to show the modal with the proof
   const handleViewPaymentProof = (proofUrl) => {
-    setPaymentProofUrl(proofUrl); // Store the payment proof URL for modal display
-    setShowPaymentProofModal(true); // Open the payment proof modal
+    setPaymentProofUrl(proofUrl);
+    setShowPaymentProofModal(true); // Show the modal
   };
 
   // Close the payment proof modal
   const closePaymentProofModal = () => {
-    setShowPaymentProofModal(false); // Close the modal
-    setPaymentProofUrl(null); // Clear the payment proof URL
+    setShowPaymentProofModal(false);
+    setPaymentProofUrl(null); // Reset URL when closing
+  };
+
+  // Switch to the OnsitePaymentHistory view
+  const handleShowOnsitePaymentHistory = () => {
+    setShowOnsitePaymentHistory(true);
   };
 
   return (
-    <div className="p-6 sm:p-8 bg-gray-50 min-h-screen w-full lg:w-[85%] ">
-      <h1 className="text-3xl text-center font-bold text-[#724E2C] mb-6">
-        Payment History
-      </h1>
-
-      {loading ? (
-        <div className="flex justify-center items-center text-lg">
-          Loading...
-        </div>
-      ) : paymentHistory.length === 0 ? (
-        <div className="text-center text-gray-600">
-          No payment history found.
-        </div>
+    <div className="p-6 sm:p-8 bg-gray-50 min-h-screen w-full lg:w-[85%]">
+      {/* If showing OnsitePaymentHistory, render it, otherwise render PaymentHistory */}
+      {showOnsitePaymentHistory ? (
+        <OnsitePaymentHistory
+          onBack={() => setShowOnsitePaymentHistory(false)}
+        />
       ) : (
-        <div className="overflow-x-auto rounded-lg shadow-lg">
-          <table className="min-w-full table-auto bg-white border-collapse">
-            <thead>
-              <tr className="text-white bg-[#724E2C]">
-                <th className="py-3 px-4 text-left">Customer</th>
-                <th className="py-3 px-4 text-left">Total</th>
-                <th className="py-3 px-4 text-left">Payment Mode</th>
-                <th className="py-3 px-4 text-left">Status</th>
-                <th className="py-3 px-4 text-left">Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              {paymentHistory.map((payment) => (
-                <tr key={payment.id} className="border-b hover:bg-gray-100">
-                  <td className="py-3 px-4">{payment.customer}</td>
-                  <td className="py-3 px-4">
-                    ₱ {payment.totalPrice.toFixed(2)}
-                  </td>
-                  <td className="py-3 px-4">{payment.paymentMode}</td>
-                  <td className="py-3 px-4">
-                    <span
-                      className={`${
-                        payment.status === "Accepted"
-                          ? "bg-green-500"
-                          : payment.status === "Declined"
-                          ? "bg-red-500"
-                          : "bg-yellow-500"
-                      } text-white py-1 px-3 rounded-full`}
-                    >
-                      {payment.status}
-                    </span>
-                  </td>
-                  <td className="py-3 px-4">
-                    <button
-                      onClick={() => handleViewDetails(payment)}
-                      className="text-blue-500 hover:text-blue-700"
-                    >
-                      View
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        <>
+          {/* Payment History Title */}
+          <h1 className="text-3xl text-center font-bold text-[#724E2C] mb-6">
+            Payment History
+          </h1>
+
+          {/* Button to switch to OnsitePaymentHistory */}
+          <div className="flex justify-end mt-4">
+            <button
+              onClick={handleShowOnsitePaymentHistory}
+              className="bg-[#724E2C] text-white py-2 px-4 rounded-md hover:bg-[#4E3225] transition-all"
+            >
+              View Onsite Payment History
+            </button>
+          </div>
+
+          {/* Loading State */}
+          {loading ? (
+            <div className="flex justify-center items-center text-lg my-6">
+              Loading...
+            </div>
+          ) : paymentHistory.length === 0 ? (
+            <div className="text-center text-gray-600 my-6">
+              No payment history found.
+            </div>
+          ) : (
+            <div className="overflow-x-auto rounded-lg shadow-lg mt-6">
+              {/* Table displaying payment history */}
+              <table className="min-w-full table-auto bg-white border-collapse">
+                <thead>
+                  <tr className="text-white bg-[#724E2C]">
+                    <th className="py-3 px-6 text-left">Customer</th>
+                    <th className="py-3 px-6 text-left">Total</th>
+                    <th className="py-3 px-6 text-left">Payment Mode</th>
+                    <th className="py-3 px-6 text-left">Status</th>
+                    <th className="py-3 px-6 text-left">Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {paymentHistory.map((payment) => (
+                    <tr key={payment.id} className="border-b hover:bg-gray-100">
+                      <td className="py-3 px-6">{payment.customer}</td>
+                      <td className="py-3 px-6">
+                        ₱ {payment.totalPrice.toFixed(2)}
+                      </td>
+                      <td className="py-3 px-6">{payment.paymentMode}</td>
+                      <td className="py-3 px-6">
+                        <span
+                          className={`${
+                            payment.status === "Accepted"
+                              ? "bg-green-500"
+                              : payment.status === "Declined"
+                              ? "bg-red-500"
+                              : "bg-yellow-500"
+                          } text-white py-1 px-3 rounded-full`}
+                        >
+                          {payment.status}
+                        </span>
+                      </td>
+                      <td className="py-3 px-6">
+                        <button
+                          onClick={() => handleViewDetails(payment)}
+                          className="text-blue-500 hover:text-blue-700 transition-all"
+                        >
+                          View
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </>
       )}
 
       {/* Display Payment Details Modal */}
@@ -161,7 +191,6 @@ export default function PaymentHistory() {
               </div>
             </div>
 
-            {/* Dashed Line Separator */}
             <div className="my-4 border-t-2 border-dashed border-gray-300"></div>
 
             <div className="space-y-2">
@@ -195,7 +224,7 @@ export default function PaymentHistory() {
 
       {/* Display Payment Proof Modal */}
       {showPaymentProofModal && paymentProofUrl && (
-        <div className="fixed inset-0 flex justify-center items-center bg-[rgba(0,0,0,0.1)] z-1000  ">
+        <div className="fixed inset-0 flex justify-center items-center bg-[rgba(0,0,0,0.1)] z-1000">
           <div className="bg-white p-6 rounded-lg shadow-lg max-w-lg w-full">
             <div className="flex justify-between items-center">
               <h2 className="text-xl font-bold">Payment Proof</h2>
@@ -210,7 +239,7 @@ export default function PaymentHistory() {
               <img
                 src={paymentProofUrl}
                 alt="Payment Proof"
-                className="max-w-full  h-140 max-h-[800px] object-cover rounded-md"
+                className="max-w-full h-140 max-h-[800px] object-cover rounded-md"
               />
             </div>
           </div>
