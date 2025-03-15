@@ -303,7 +303,7 @@ export default function Products() {
                 <img
                   src={product.imageUrl}
                   alt={product.productName}
-                  className="w-full h-50 object-cover rounded-md"
+                  className="w-full  object-cover rounded-md"
                 />
               </div>
 

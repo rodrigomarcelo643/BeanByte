@@ -117,7 +117,6 @@ export default function Products() {
         <h4 className="text-center text-xl font-semibold text-gray-700 mb-6">
           Add a New Product
         </h4>
-
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Product Name */}
           <div>
@@ -177,8 +176,11 @@ export default function Products() {
               className="w-full h-12 border border-gray-300 rounded-md p-3 focus:outline-none focus:ring-2 focus:ring-[#724E2C] bg-gray-100 text-gray-700"
             >
               <option value="">Select Category</option>
-              <option value="Coffee">Coffee</option>
-              <option value="Tea">Tea</option>
+              <option value="Coffee">Hot Coffee</option>
+              <option value="Tea">Iced Coffee</option>
+              <option value="Frappe">Frappe</option>
+              <option value="Frappe">Refreshments</option>
+              <option value="Croffles">Croffles-Baked Croissant</option>
             </select>
           </div>
 
