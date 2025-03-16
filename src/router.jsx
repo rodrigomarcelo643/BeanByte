@@ -24,7 +24,7 @@ const router = createBrowserRouter([
     element: <Sidebar />,
   },
   {
-    path: "/LandingPage",
+    path: "/Bean&Co.",
     element: <LandingPage />,
   },
   {

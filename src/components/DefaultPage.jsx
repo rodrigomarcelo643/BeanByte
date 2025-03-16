@@ -26,7 +26,7 @@ const DefaultPage = () => {
       if (role === "admin") {
         navigate("/AdminLogin");
       } else {
-        navigate("/LandingPage");
+        navigate("/Bean&Co.");
       }
     }, 4000); // Wait 4 seconds before navigating
   };
