@@ -16,11 +16,11 @@ const router = createBrowserRouter([
     children: [],
   },
   {
-    path: "/AdminLogin",
+    path: "/Bean&Co.Login",
     element: <AdminLogin />,
   },
   {
-    path: "/Admin",
+    path: "/Bean&Co.Admin",
     element: <Sidebar />,
   },
   {

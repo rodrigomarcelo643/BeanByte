@@ -24,7 +24,7 @@ const DefaultPage = () => {
     setLoading(true);
     setTimeout(() => {
       if (role === "admin") {
-        navigate("/AdminLogin");
+        navigate("/Bean&Co.Login");
       } else {
         navigate("/Bean&Co.");
       }

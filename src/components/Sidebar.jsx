@@ -49,7 +49,17 @@ import Profile from "../pages/Profile";
 import Payments from "../pages/Payments";
 import PaymentHistory from "../pages/PaymentHistory";
 import AddOrder from "../pages/AddOrder";
-
+import coffeeGif from "../assets/coffee.gif";
+const LoadingModal = () => (
+  <div className="fixed inset-0 bg-[rgba(0,0,0,0.3)] flex justify-center items-center z-999">
+    <div className="bg-white rounded-lg flex flex-col justify-center items-center">
+      <img src={coffeeGif} className="w-60 h-60" />
+      <p className="mt-4 text-[#724E2C] text-xl  relative top-[-80px] tefont-semibold">
+        Bean&Co....
+      </p>{" "}
+    </div>
+  </div>
+);
 export function Sidebar() {
   const location = useLocation();
   const navigate = useNavigate();
@@ -59,6 +69,7 @@ export function Sidebar() {
   const [activeContent, setActiveContent] = useState(<Analytics />);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [showLogoutModal, setShowLogoutModal] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [notifications, setNotifications] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [lastClickedContent, setLastClickedContent] = useState(<Analytics />);
@@ -160,7 +171,11 @@ export function Sidebar() {
   };
 
   const logOutConfirm = () => {
-    navigate("/"); // Redirect to login/logout
+    setLoading(true); // Show loading modal
+    setTimeout(() => {
+      setLoading(false); // Hide loading modal
+      navigate("/Bean&Co.Login"); // Navigate after the delay
+    }, 4000); // 4000 milliseconds = 4 seconds
   };
 
   return (
@@ -487,21 +502,29 @@ export function Sidebar() {
 
       {/* Logout Confirmation Modal */}
       {showLogoutModal && (
-        <div className="fixed inset-0 flex justify-center items-center bg-[rgba(0,0,0,0.1)] bg-opacity-30 z-30">
-          <div className="bg-white p-6 rounded-lg shadow-lg w-96">
-            <Typography variant="h6" className="text-center">
+        <div className="fixed inset-0 flex justify-center items-center bg-[rgba(0,0,0,0.3)] z-999">
+          <div className="bg-white p-8 rounded-xl shadow-lg w-full max-w-md">
+            <Typography
+              variant="h6"
+              className="text-center text-xl font-semibold text-gray-800 mb-6"
+            >
               Are you sure you want to log out?
             </Typography>
-            <div className="flex justify-around mt-4">
+
+            {/* Flex container for buttons */}
+            <div className="flex space-x-4">
+              {/* Cancel Button */}
               <button
                 onClick={handleCancelLogout}
-                className="px-4 py-2 bg-gray-300 rounded-lg hover:bg-gray-400"
+                className="w-full px-6 py-2 cursor-pointer bg-gray-300  hover:bg-gray-200 text-md text-gray-800 rounded-lg flex justify-center items-center"
               >
                 Cancel
               </button>
+
+              {/* Confirm Button */}
               <button
                 onClick={logOutConfirm}
-                className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600"
+                className="w-full px-6 py-2 cursor-pointer bg-red-500 hover:bg-red-300 text-md text-white rounded-lg flex justify-center items-center"
               >
                 Confirm
               </button>
@@ -509,6 +532,9 @@ export function Sidebar() {
           </div>
         </div>
       )}
+
+      {/* Loading Modal */}
+      {loading && <LoadingModal />}
     </div>
   );
 }

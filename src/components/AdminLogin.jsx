@@ -33,7 +33,7 @@ const AdminLogin = () => {
     e.preventDefault();
   };
   function dashboardNavigate(userData) {
-    navigate("/Admin", { state: { userData } });
+    navigate("/Bean&Co.Admin", { state: { userData } });
   }
   const handleLogin = async () => {
     setUsernameError("");

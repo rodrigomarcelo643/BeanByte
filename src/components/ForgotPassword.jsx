@@ -24,7 +24,7 @@ const ForgotPassword = () => {
   const navigate = useNavigate();
 
   const handleBack = () => {
-    navigate("/AdminLogin");
+    navigate("/Bean&Co.Login");
   };
 
   const handlePasswordReset = async () => {
