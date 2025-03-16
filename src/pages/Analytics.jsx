@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Line } from "react-chartjs-2";
 import {
   Chart as ChartJS,
@@ -10,6 +10,8 @@ import {
   Tooltip,
   Legend,
 } from "chart.js";
+import { firestore } from "../../config/firebase"; // Ensure correct Firebase setup
+import { collection, getDocs } from "firebase/firestore";
 
 // Register necessary components for Chart.js
 ChartJS.register(
@@ -23,50 +25,116 @@ ChartJS.register(
 );
 
 const Analytics = () => {
-  // Sample sales data for the coffee shop (in PHP)
-  const salesDataAll = {
-    day: [
-      { date: "2023-01-01", sales: 200 },
-      { date: "2023-01-02", sales: 250 },
-      { date: "2023-01-03", sales: 300 },
-      { date: "2023-01-04", sales: 220 },
-      { date: "2023-01-05", sales: 270 },
-      { date: "2023-01-06", sales: 280 },
-      { date: "2023-01-07", sales: 350 },
-    ],
-    week: [
-      { date: "Week 1", sales: 2000 },
-      { date: "Week 2", sales: 2500 },
-      { date: "Week 3", sales: 3000 },
-      { date: "Week 4", sales: 2700 },
-    ],
-    month: [
-      { date: "Jan", sales: 5000 },
-      { date: "Feb", sales: 6000 },
-      { date: "Mar", sales: 5500 },
-      { date: "Apr", sales: 7000 },
-      { date: "May", sales: 8000 },
-      { date: "Jun", sales: 9000 },
-      { date: "Jul", sales: 8500 },
-      { date: "Aug", sales: 9500 },
-      { date: "Sep", sales: 10000 },
-      { date: "Oct", sales: 12000 },
-      { date: "Nov", sales: 14000 },
-      { date: "Dec", sales: 15000 },
-    ],
-    year: [
-      { date: "2023", sales: 120000 },
-      { date: "2024", sales: 9000 },
-      { date: "2025", sales: 6000 },
-    ],
+  // State to store sales data
+  const [salesData, setSalesData] = useState({
+    day: [],
+    week: [],
+    month: [],
+    year: [],
+  });
+  const [filter, setFilter] = useState("month");
+  const [loading, setLoading] = useState(true);
+
+  // Fetch data from Firestore
+  useEffect(() => {
+    const fetchSalesData = async () => {
+      try {
+        const onsiteHistoryRef = collection(firestore, "OnsiteHistory");
+        const paymentHistoryRef = collection(firestore, "paymentHistory");
+
+        // Fetch Onsite History and Payment History
+        const onsiteSnapshot = await getDocs(onsiteHistoryRef);
+        const paymentSnapshot = await getDocs(paymentHistoryRef);
+
+        // Process Onsite History Data (to calculate daily, weekly, monthly, yearly)
+        const onsiteData = onsiteSnapshot.docs.map((doc) => doc.data());
+        const paymentData = paymentSnapshot.docs.map((doc) => doc.data());
+
+        // Combine both Onsite and Payment History data
+        const combinedData = [...onsiteData, ...paymentData];
+
+        // Calculate the sales data based on timestamps
+        const dayData = processSalesData(combinedData, "day");
+        const weekData = processSalesData(combinedData, "week");
+        const monthData = processSalesData(combinedData, "month");
+        const yearData = processSalesData(combinedData, "year");
+
+        setSalesData({
+          day: dayData,
+          week: weekData,
+          month: monthData,
+          year: yearData,
+        });
+      } catch (error) {
+        console.error("Error fetching data from Firestore:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchSalesData();
+  }, []);
+
+  // Process Sales Data for different periods (day, week, month, year)
+  const processSalesData = (data, period) => {
+    const salesByPeriod = {};
+
+    data.forEach((item) => {
+      // Determine timestamp and calculate sales
+      const timestamp = item.createdAt?.seconds * 1000 || Date.now();
+      const date = new Date(timestamp);
+      let periodLabel;
+
+      // Handle both Onsite and Payment History data
+      let totalSales = 0;
+      if (item.totalAmount) {
+        totalSales += item.totalAmount; // Onsite sales
+      }
+      if (item.totalPrice) {
+        totalSales += item.totalPrice; // Payment history sales
+      }
+
+      // Add sales from orderDetails in payment history
+      if (item.orderDetails) {
+        item.orderDetails.forEach((order) => {
+          totalSales += order.total || 0; // Add each item's total to the sales
+        });
+      }
+
+      // Group by period (day, week, month, year)
+      switch (period) {
+        case "day":
+          periodLabel = date.toLocaleDateString();
+          break;
+        case "week":
+          const weekNumber = Math.ceil(date.getDate() / 7);
+          periodLabel = `Week ${weekNumber}`;
+          break;
+        case "month":
+          periodLabel = date.toLocaleString("default", { month: "short" });
+          break;
+        case "year":
+          periodLabel = date.getFullYear().toString();
+          break;
+        default:
+          periodLabel = date.toLocaleDateString();
+      }
+
+      // Aggregate sales by period
+      if (!salesByPeriod[periodLabel]) {
+        salesByPeriod[periodLabel] = 0;
+      }
+      salesByPeriod[periodLabel] += totalSales;
+    });
+
+    // Convert to an array of data points sorted by the period label
+    return Object.keys(salesByPeriod)
+      .sort()
+      .map((label) => ({ date: label, sales: salesByPeriod[label] }));
   };
 
-  // State to store selected filter
-  const [filter, setFilter] = useState("month");
-
-  // Function to format sales data based on selected filter
   const getDataForFilter = (filter) => {
-    let filteredData = salesDataAll[filter];
+    let filteredData = salesData[filter];
     const labels = filteredData.map((data) => data.date);
     const data = filteredData.map((data) => data.sales);
 
@@ -90,7 +158,6 @@ const Analytics = () => {
     };
   };
 
-  // Chart options to customize the chart behavior
   const options = {
     responsive: true,
     plugins: {
@@ -114,7 +181,13 @@ const Analytics = () => {
         title: {
           display: true,
           text:
-            filter === "year" ? "Year" : filter === "month" ? "Month" : "Day",
+            filter === "year"
+              ? "Year"
+              : filter === "month"
+              ? "Month"
+              : filter === "week"
+              ? "Week"
+              : "Day",
         },
       },
       y: {
@@ -137,7 +210,7 @@ const Analytics = () => {
       {/* Filter Buttons */}
       <div className="flex flex-wrap space-x-4 mb-8">
         <button
-          className="px-4 py-2  cursor-pointer bg-[#724E2C] hover:bg-[#a79482] text-white rounded mb-4 sm:mb-0"
+          className="px-4 py-2 cursor-pointer bg-[#724E2C] hover:bg-[#a79482] text-white rounded mb-4 sm:mb-0"
           onClick={() => setFilter("day")}
         >
           Day
@@ -162,10 +235,14 @@ const Analytics = () => {
         </button>
       </div>
 
-      {/* Line Chart */}
-      <div className="flex justify-center w-full sm:w-[80%] h-[400px] sm:h-[500px]">
-        <Line data={getDataForFilter(filter)} options={options} />
-      </div>
+      {/* Loading State */}
+      {loading ? (
+        <div className="text-center">Loading...</div>
+      ) : (
+        <div className="flex justify-center w-full sm:w-[80%] h-[400px] sm:h-[500px]">
+          <Line data={getDataForFilter(filter)} options={options} />
+        </div>
+      )}
     </div>
   );
 };

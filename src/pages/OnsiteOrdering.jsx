@@ -170,11 +170,11 @@ const OnsiteOrdering = ({ onBack }) => {
               <tr className="bg-[#724E2C] text-white">
                 <th className="px-4 py-2">Product Name</th>
                 <th className="px-4 py-2">Quantity</th>
-                <th className="px-6 py-2">Price</th>
+                <th className="px-6 py-2">Price Amount </th>
                 <th className="px-4 py-2">Total Amount</th>
                 <th className="px-4 py-2">Payment Method</th>
                 <th className="px-4 py-2">Status</th>
-                <th className="px-4 py-2">Created At</th>
+                <th className="px-4 py-2">Date</th>
                 <th className="px-4 py-2">Action</th>
               </tr>
             </thead>
@@ -183,11 +183,11 @@ const OnsiteOrdering = ({ onBack }) => {
                 <tr key={order.id} className="border-b hover:bg-gray-100">
                   <td className="px-4 py-2">
                     <div className="font-semibold">
-                      {order.items[0].productName}
+                      {order.items[0].productName} ...
                     </div>
                   </td>
                   <td className="px-4 py-2">{order.items[0].quantity}</td>
-                  <td className="px-6 py-2">
+                  <td className="px-9 py-2  ">
                     ₱ {order.items[0].price.toFixed(2)}
                   </td>
                   <td className="px-4 py-2">

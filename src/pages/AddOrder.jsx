@@ -344,6 +344,9 @@ export default function AddOrder() {
           {/* Display selected product details */}
           {selectedProduct && (
             <div className="mt-4">
+              {/* Dashed line above */}
+              <div className="border-t-2 border-dashed border-gray-300 mb-4"></div>
+
               <div className="flex items-center mb-4">
                 <img
                   src={selectedProduct.imageUrl}
@@ -396,6 +399,9 @@ export default function AddOrder() {
               >
                 Add to Cart
               </button>
+
+              {/* Dashed line below */}
+              <div className="border-b-2 border-dashed border-gray-300 mt-4"></div>
             </div>
           )}
 
@@ -416,7 +422,7 @@ export default function AddOrder() {
                 <input
                   type="radio"
                   value="Takeout"
-                  checked={orderType === "Takeout"}
+                  checked={orderType === "Take-out"}
                   onChange={handleOrderTypeChange}
                 />{" "}
                 Take-out
@@ -442,6 +448,9 @@ export default function AddOrder() {
           {/* Display Cart */}
           {cart.length > 0 && (
             <div className="mt-6">
+              {/* Dashed line above cart */}
+              <div className="border-t-2 border-dashed border-[#724E2C] mb-4"></div>
+
               <h4 className="text-xl font-semibold mb-4">Your Cart:</h4>
               <ul>
                 {cart.map((item, index) => (
@@ -467,6 +476,9 @@ export default function AddOrder() {
               >
                 Finalize Order
               </button>
+
+              {/* Dashed line below cart */}
+              <div className="border-b-2 border-dashed border-[#724E2C] mt-4"></div>
             </div>
           )}
         </div>
