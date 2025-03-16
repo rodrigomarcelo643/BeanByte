@@ -98,18 +98,6 @@ const LandingPage = () => {
             )}
           </a>
           <a
-            href="#about"
-            onClick={() => handleTabChange("about")}
-            className={`text-[17px] text-brown-600 relative transition-all duration-300 ease-in-out ${
-              currentTab === "about" ? "text-[#6F4E37] font-bold" : ""
-            }`}
-          >
-            About
-            {currentTab === "about" && (
-              <div className="circle-animation absolute bottom-[-10px] left-1/2 transform -translate-x-1/2"></div>
-            )}
-          </a>
-          <a
             href="#products"
             onClick={() => handleTabChange("products")}
             className={`text-[17px] text-brown-600 relative transition-all duration-300 ease-in-out ${
@@ -121,6 +109,19 @@ const LandingPage = () => {
               <div className="circle-animation absolute bottom-[-10px] left-1/2 transform -translate-x-1/2"></div>
             )}
           </a>
+          <a
+            href="#about"
+            onClick={() => handleTabChange("about")}
+            className={`text-[17px] text-brown-600 relative transition-all duration-300 ease-in-out ${
+              currentTab === "about" ? "text-[#6F4E37] font-bold" : ""
+            }`}
+          >
+            About
+            {currentTab === "about" && (
+              <div className="circle-animation absolute bottom-[-10px] left-1/2 transform -translate-x-1/2"></div>
+            )}
+          </a>
+
           <a
             href="#support"
             onClick={() => handleTabChange("support")}
@@ -172,19 +173,20 @@ const LandingPage = () => {
           Home
         </a>
         <a
-          href="#about"
-          onClick={() => handleTabChange("about")}
-          className="text-lg text-brown-600 hover:text-gray-800"
-        >
-          About
-        </a>
-        <a
           href="#products"
           onClick={() => handleTabChange("products")}
           className="text-lg text-brown-600 hover:text-gray-800"
         >
           Products
         </a>
+        <a
+          href="#about"
+          onClick={() => handleTabChange("about")}
+          className="text-lg text-brown-600 hover:text-gray-800"
+        >
+          About
+        </a>
+
         <a
           href="#support"
           onClick={() => handleTabChange("support")}
@@ -195,6 +197,7 @@ const LandingPage = () => {
 
         <a
           href="#Order"
+          onClick={() => handleTabChange("products")}
           className="text-[17px] border-2 border-[#6F4E37] py-1 px-7 hover:bg-[#6F4E37] hover:text-white rounded-[10px] text-brown-600 hover:bg-brown-100"
         >
           Order Now!
