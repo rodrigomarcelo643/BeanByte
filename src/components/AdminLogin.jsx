@@ -7,31 +7,44 @@ import { useNavigate } from "react-router-dom";
 import { auth, database } from "../../config/firebase";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { ref, get } from "firebase/database";
+import coffeeGif from "../assets/coffee.gif";
+const LoadingModal = () => (
+  <div className="fixed inset-0 bg-[rgba(0,0,0,0.3)] flex justify-center items-center z-999">
+    <div className="bg-white rounded-lg flex flex-col justify-center items-center">
+      <img src={coffeeGif} className="w-60 h-60" />
+      <p className="mt-4 text-[#724E2C] text-xl  relative top-[-80px] tefont-semibold">
+        Bean&Co....
+      </p>{" "}
+    </div>
+  </div>
+);
 
 const AdminLogin = () => {
-  const [email, setEmail] = useState(""); // The input field for email/username
-  const [password, setPassword] = useState(""); // The input field for password
-  const [error, setError] = useState(""); // Error state
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [usernameError, setUsernameError] = useState("");
+  const [passwordError, setPasswordError] = useState("");
+  const [notFoundError, setNotFoundError] = useState("");
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   const handleSubmit = (e) => {
     e.preventDefault();
   };
-
-  // Navigate to the Admin dashboard if login is successful
   function dashboardNavigate(userData) {
-    navigate("/Admin", { state: { userData } }); // Pass user data to Sidebar.jsx
+    navigate("/Admin", { state: { userData } });
   }
-
-  // Login function using Firebase Authentication
   const handleLogin = async () => {
-    try {
-      // First, check if the input is a username or an email
-      let userEmail = email;
+    setUsernameError("");
+    setPasswordError("");
+    setNotFoundError("");
+    setError("");
+    setLoading(true);
 
-      // Check if the input is a username (not an email format)
+    try {
+      let userEmail = email;
       if (!email.includes("@")) {
-        // Fetch the user record from Firebase Realtime Database based on the username
         const usernameRef = ref(database, "users/");
         const snapshot = await get(usernameRef);
         let foundUser = null;
@@ -44,33 +57,40 @@ const AdminLogin = () => {
         });
 
         if (!foundUser) {
-          setError("Username not found. Please try again.");
+          setUsernameError("Username not found. Please try again.");
+          setLoading(false);
           return;
         }
 
-        userEmail = foundUser.email; // Set the userEmail from the found user data
+        userEmail = foundUser.email;
       }
-
-      // Sign in the user using Firebase Authentication (handles password hashing and comparison)
       const userCredential = await signInWithEmailAndPassword(
         auth,
-        userEmail, // Use the actual email associated with the username
+        userEmail,
         password
       );
       const user = userCredential.user;
 
-      // Fetch user data from Firebase Realtime Database
-      const userRef = ref(database, "users/" + user.uid); // Reference to the user data in the database
+      const userRef = ref(database, "users/" + user.uid);
       const snapshot = await get(userRef);
 
       if (snapshot.exists()) {
-        const userData = snapshot.val(); // Get the user data from the database
-        dashboardNavigate(userData); // Pass the user data to the dashboard
+        const userData = snapshot.val();
+        setTimeout(() => {
+          setLoading(false);
+          dashboardNavigate(userData);
+        }, 4000);
       } else {
-        setError("No user data found in the database.");
+        setNotFoundError("No user data found in the database.");
+        setLoading(false);
       }
     } catch (err) {
-      setError("Invalid credentials. Please try again.");
+      setLoading(false);
+      if (err.code === "auth/wrong-password") {
+        setPasswordError("Invalid password. Please try again.");
+      } else {
+        setError("Invalid credentials. Please try again.");
+      }
     }
   };
 
@@ -80,7 +100,7 @@ const AdminLogin = () => {
         {/* Left side (Login form) */}
         <div className="lg:w-1/2 xl:w-5/12 p-6 sm:p-12">
           <div className="flex justify-center items-center">
-            <img src={logo} className="w-40 h-40" alt="Logo" />
+            <img src={logo} className="w-26 h-26" alt="Logo" />
           </div>
 
           <div className="mt-12 flex flex-col items-center">
@@ -97,6 +117,10 @@ const AdminLogin = () => {
                   <div className="absolute left-3 top-4">
                     <FaUserAlt className="text-[#724E2C] text-[18px]" />
                   </div>
+                  {/* Display username error message */}
+                  {usernameError && (
+                    <p className="text-red-500 text-sm mt-1">{usernameError}</p>
+                  )}
                 </div>
 
                 <div className="relative mt-5">
@@ -110,6 +134,10 @@ const AdminLogin = () => {
                   <div className="absolute left-2 top-3">
                     <img src={passwordIcon} alt="Password Icon" />
                   </div>
+                  {/* Display password error message */}
+                  {passwordError && (
+                    <p className="text-red-500 text-sm mt-1">{passwordError}</p>
+                  )}
                 </div>
 
                 <button
@@ -119,9 +147,15 @@ const AdminLogin = () => {
                 >
                   <span className="ml-1 text-md text-white">Sign In</span>
                 </button>
-              </form>
 
-              {error && <p className="text-red-500 mt-4">{error}</p>}
+                {/* Show loading modal if loading is true */}
+                {loading && <LoadingModal />}
+
+                {error && <p className="text-red-500 mt-4">{error}</p>}
+                {notFoundError && (
+                  <p className="text-red-500 mt-4">{notFoundError}</p>
+                )}
+              </form>
 
               <div className="mt-4 text-sm text-center">
                 <a

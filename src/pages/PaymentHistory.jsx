@@ -3,16 +3,16 @@ import { firestore } from "../../config/firebase";
 import { collection, getDocs } from "firebase/firestore";
 import Swal from "sweetalert2";
 import { FaTimesCircle } from "react-icons/fa";
-import OnsitePaymentHistory from "./OnsitePaymentHistory"; // Import your OnsitePaymentHistory component
+import OnsitePaymentHistory from "./OnsitePaymentHistory";
 
 export default function PaymentHistory() {
   const [paymentHistory, setPaymentHistory] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedPayment, setSelectedPayment] = useState(null);
   const [showPaymentProofModal, setShowPaymentProofModal] = useState(false);
-  const [paymentProofUrl, setPaymentProofUrl] = useState(null); // Fix: Declare state for paymentProofUrl
+  const [paymentProofUrl, setPaymentProofUrl] = useState(null);
   const [showOnsitePaymentHistory, setShowOnsitePaymentHistory] =
-    useState(false); // State to control visibility of OnsitePaymentHistory
+    useState(false);
 
   // Fetch payment history from Firestore
   const fetchPaymentHistory = async () => {
@@ -25,12 +25,7 @@ export default function PaymentHistory() {
         ...doc.data(),
       }));
 
-      // Filter by the address "Caliongan, Dalaguete, Cebu"
-      const filteredPayments = paymentHistoryList.filter(
-        (payment) => payment.address === "Caliongan, Dalaguete, Cebu"
-      );
-
-      setPaymentHistory(filteredPayments);
+      setPaymentHistory(paymentHistoryList);
     } catch (error) {
       console.error("Error fetching payment history: ", error);
       Swal.fire({
@@ -46,22 +41,17 @@ export default function PaymentHistory() {
   useEffect(() => {
     fetchPaymentHistory();
   }, []);
-
-  // Handle "View" button click to show full details
   const handleViewDetails = (payment) => {
     setSelectedPayment(payment);
   };
 
-  // Handle "View Payment Proof" click to show the modal with the proof
   const handleViewPaymentProof = (proofUrl) => {
     setPaymentProofUrl(proofUrl);
-    setShowPaymentProofModal(true); // Show the modal
+    setShowPaymentProofModal(true);
   };
-
-  // Close the payment proof modal
   const closePaymentProofModal = () => {
     setShowPaymentProofModal(false);
-    setPaymentProofUrl(null); // Reset URL when closing
+    setPaymentProofUrl(null);
   };
 
   // Switch to the OnsitePaymentHistory view
