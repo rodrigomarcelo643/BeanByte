@@ -20,7 +20,7 @@ const ForgotPassword = () => {
   const [email, setEmail] = useState("");
   const [error, setError] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
-  const [loading, setLoading] = useState(false); // State for showing the loading modal
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   const handleBack = () => {

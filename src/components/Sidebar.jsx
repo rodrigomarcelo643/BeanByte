@@ -10,7 +10,7 @@ import {
   AccordionBody,
 } from "@material-tailwind/react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { firestore } from "../../config/firebase"; // Assuming your Firebase config is set here
+import { firestore } from "../../config/firebase";
 import {
   collection,
   query,
@@ -34,7 +34,7 @@ import {
   BellIcon,
 } from "@heroicons/react/24/solid";
 import logo from "../assets/main_logo.png";
-import profile from "../assets/profile.jpg";
+import profile from "../assets/default_picture.jpg";
 import dashboardIcon from "../assets/dashboardIcon.png";
 import manageLogo from "../assets/manageProducts.png";
 import transactionsLogo from "../assets/transactionsLogo.png";
@@ -50,21 +50,23 @@ import Payments from "../pages/Payments";
 import PaymentHistory from "../pages/PaymentHistory";
 import AddOrder from "../pages/AddOrder";
 import coffeeGif from "../assets/coffee.gif";
+
 const LoadingModal = () => (
   <div className="fixed inset-0 bg-[rgba(0,0,0,0.3)] flex justify-center items-center z-999">
     <div className="bg-white rounded-lg flex flex-col justify-center items-center">
       <img src={coffeeGif} className="w-60 h-60" />
-      <p className="mt-4 text-[#724E2C] text-xl  relative top-[-80px] tefont-semibold">
+      <p className="mt-4 text-[#724E2C] text-xl relative top-[-80px] font-semibold">
         Bean&Co....
-      </p>{" "}
+      </p>
     </div>
   </div>
 );
+
 export function Sidebar() {
   const location = useLocation();
   const navigate = useNavigate();
   const userData = location.state?.userData;
-  console.log(userData);
+  console.log("Sidenar", userData);
   const [open, setOpen] = useState(0);
   const [activeContent, setActiveContent] = useState(<Analytics />);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -73,10 +75,28 @@ export function Sidebar() {
   const [notifications, setNotifications] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [lastClickedContent, setLastClickedContent] = useState(<Analytics />);
-  const [isNotificationsOpen, setIsNotificationsOpen] = useState(false); // To toggle notifications list
+  const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
 
   const limit = 10; // Set limit for displaying notifications
+  useEffect(() => {
+    // If there's no userData to begin with, return early
+    if (!userData?.uid) return;
 
+    // Set up a real-time listener on the user's data in the Firebase Realtime Database
+    const userRef = ref(database, "users/" + userData.uid);
+
+    // Listen for changes to the user data
+    const unsubscribe = onValue(userRef, (snapshot) => {
+      if (snapshot.exists()) {
+        // Update the state with the new user data
+        const updatedUserData = snapshot.val();
+        setUserData(updatedUserData); // Update state with new data
+      }
+    });
+
+    // Clean up listener when the component unmounts or when `userData` changes
+    return () => unsubscribe();
+  }, [userData?.uid]);
   // Firebase query for unread notifications
   useEffect(() => {
     const q = query(
@@ -89,7 +109,6 @@ export function Sidebar() {
         ...doc.data(),
       }));
 
-      // Sort notifications by timestamp in descending order (latest first)
       notificationsData.sort(
         (a, b) => b.timestamp.seconds - a.timestamp.seconds
       );
@@ -98,6 +117,65 @@ export function Sidebar() {
       setUnreadCount(
         notificationsData.filter((n) => n.status === "unread").length
       );
+    });
+
+    return () => unsubscribe(); // Cleanup listener on unmount
+  }, []);
+
+  // Firebase query for products and stock notifications
+  useEffect(() => {
+    const q = query(collection(firestore, "products"));
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const productsData = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+
+      const newNotifications = productsData.flatMap((product) => {
+        const stock = parseInt(product.stock, 10);
+        const notifications = [];
+
+        if (stock === 0) {
+          notifications.push({
+            id: product.id,
+            message: `${product.productName} is out of stock!`,
+            status: "unread",
+            timestamp: new Date(),
+          });
+        } else if (stock <= 1) {
+          notifications.push({
+            id: product.id,
+            message: `${product.productName} has only 1 left in stock!`,
+            status: "unread",
+            timestamp: new Date(),
+          });
+        } else if (stock <= 5) {
+          notifications.push({
+            id: product.id,
+            message: `${product.productName} has only ${stock} left in stock!`,
+            status: "unread",
+            timestamp: new Date(),
+          });
+        } else if (stock <= 10) {
+          notifications.push({
+            id: product.id,
+            message: `${product.productName} has only ${stock} left in stock!`,
+            status: "unread",
+            timestamp: new Date(),
+          });
+        }
+
+        return notifications;
+      });
+
+      // Combine new notifications with existing ones and remove duplicates
+      const combinedNotifications = [...newNotifications, ...notifications];
+      const uniqueNotifications = Array.from(
+        new Map(combinedNotifications.map((item) => [item.id, item])).values()
+      );
+
+      setNotifications(uniqueNotifications);
+      setUnreadCount((prevCount) => prevCount + newNotifications.length);
     });
 
     return () => unsubscribe(); // Cleanup listener on unmount
@@ -336,7 +414,7 @@ export function Sidebar() {
             </AccordionBody>
           </Accordion>
 
-          {/* Transactions  Accordion */}
+          {/* Transactions Accordion */}
           <Accordion
             open={open === 4}
             icon={
@@ -380,7 +458,6 @@ export function Sidebar() {
           </Accordion>
 
           {/* Other Menu Items */}
-
           <ListItem
             onClick={() => updateContent("Profile")}
             className="group cursor-pointer relative hover:bg-gray-200 p-2"
@@ -425,18 +502,18 @@ export function Sidebar() {
                   <div className="absolute top-0 right-0 w-3 h-3 bg-red-500 rounded-full animate-pulse"></div>
                 )}
                 {isNotificationsOpen && (
-                  <div className="absolute top-10 right-0 bg-white p-4 border border-[#D3B094] rounded-lg shadow-md w-120 z-20">
+                  <div className="absolute top-10 right-0 bg-white p-4 border border-[#D3B094] rounded-lg shadow-md w-120 z-20 max-h-60 overflow-y-auto">
                     <Typography
                       variant="h6"
                       className="font-semibold text-lg text-[#724E2C]"
                     >
                       Notifications
                     </Typography>
-                    <div className="space-y-2 mt-2 max-h-96 overflow-y-scroll">
+                    <div className="space-y-2 mt-2">
                       {notifications.slice(0, limit).map((notification) => (
                         <div
                           key={notification.id}
-                          className={`flex justify-between items-center cursor-pointer p-2 rounded-md transition-all duration-200 ${
+                          className={`flex  items-center cursor-pointer p-2 rounded-md transition-all duration-200 ${
                             notification.status === "unread"
                               ? "bg-gradient-to-r from-green-50 via-green-200 to-green-100 "
                               : "bg-green-50 hover:bg-green-100"
@@ -460,11 +537,6 @@ export function Sidebar() {
                             }`}
                           >
                             {notification.message}
-                          </span>
-                          <span className="text-xs text-gray-500">
-                            {new Date(
-                              notification.timestamp.seconds * 1000
-                            ).toLocaleTimeString()}
                           </span>
                         </div>
                       ))}
@@ -495,7 +567,7 @@ export function Sidebar() {
         </div>
 
         {/* Content Display */}
-        <div className="pt-25 p-8 w-full relative md:left-0  overflow-x-hidden lg:left-55 bg-gray-100">
+        <div className="pt-25 p-8 w-full relative md:left-0 overflow-x-hidden lg:left-55 bg-gray-100">
           {activeContent}
         </div>
       </div>
@@ -516,7 +588,7 @@ export function Sidebar() {
               {/* Cancel Button */}
               <button
                 onClick={handleCancelLogout}
-                className="w-full px-6 py-2 cursor-pointer bg-gray-300  hover:bg-gray-200 text-md text-gray-800 rounded-lg flex justify-center items-center"
+                className="w-full px-6 py-2 cursor-pointer bg-gray-300 hover:bg-gray-200 text-md text-gray-800 rounded-lg flex justify-center items-center"
               >
                 Cancel
               </button>

@@ -13,7 +13,7 @@ const LoadingModal = () => (
   <div className="fixed inset-0 bg-[rgba(0,0,0,0.3)] flex justify-center items-center z-999">
     <div className="bg-white rounded-lg flex flex-col justify-center items-center">
       <img src={coffeeGif} className="w-60 h-60" />
-      <p className="mt-4 text-[#724E2C] text-xl  relative top-[-80px] font-semibold">
+      <p className="mt-4 text-[#724E2C] text-xl relative top-[-80px] font-semibold">
         Bean&Co....
       </p>
     </div>
@@ -47,7 +47,9 @@ const AdminLogin = () => {
 
     try {
       let userEmail = email;
+
       if (!email.includes("@")) {
+        // If email isn't an email address, try to find a user by username
         const usernameRef = ref(database, "users/");
         const snapshot = await get(usernameRef);
         let foundUser = null;
@@ -65,16 +67,19 @@ const AdminLogin = () => {
           return;
         }
 
-        userEmail = foundUser.email;
+        userEmail = foundUser.email; // Set email from found user
       }
+
+      // Try to sign in with email and password
       const userCredential = await signInWithEmailAndPassword(
         auth,
         userEmail,
         password
       );
-      const user = userCredential.user;
 
+      const user = userCredential.user;
       const userRef = ref(database, "users/" + user.uid);
+
       const snapshot = await get(userRef);
 
       if (snapshot.exists()) {
@@ -99,7 +104,6 @@ const AdminLogin = () => {
 
   return (
     <div className="min-h-screen bg-gray-100 text-gray-900 flex justify-center items-center">
-      {" "}
       {/* This centers the whole content */}
       <div className="max-w-screen-xl w-full sm:m-10 bg-white shadow sm:rounded-lg flex justify-center flex-1">
         {/* Left side (Login form) */}

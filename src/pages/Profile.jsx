@@ -1,35 +1,89 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import Swal from "sweetalert2";
 import { FaEdit } from "react-icons/fa"; // Edit Icon
+import { ref, update } from "firebase/database"; // Import update from Firebase
+import { database } from "../../config/firebase"; // Import Firebase database configuration
+import coffeeGif from "../assets/coffee.gif"; // Import your loading gif
+
+const LoadingModal = () => (
+  <div className="fixed inset-0 bg-[rgba(0,0,0,0.3)] flex justify-center items-center z-999">
+    <div className="bg-white rounded-lg flex flex-col justify-center items-center">
+      <img src={coffeeGif} className="w-60 h-60" alt="Loading..." />
+      <p className="mt-4 text-[#724E2C] text-xl relative top-[-80px] font-semibold">
+        Bean&Co....
+      </p>
+    </div>
+  </div>
+);
 
 const Profile = () => {
   const location = useLocation();
-  const initialUserData = location.state?.userData;
-  const [userData, setUserData] = useState(initialUserData);
+  const userDataFromLocation = location.state?.userData;
+
+  const [userData, setUserData] = useState(userDataFromLocation || {});
   const [isEditing, setIsEditing] = useState(false);
   const [edited, setEdited] = useState(false);
+  const [isLoading, setIsLoading] = useState(false); // New state to handle loading
+  const staticUid = "2V4sm171IeU4rb36SUoHkCLYSkG2";
 
-  // Handle input change
+  // Handle input change and immediately update userData state
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setUserData((prevData) => ({
-      ...prevData,
-      [name]: value,
-    }));
-    setEdited(true); // Set edited flag when data changes
+    setUserData((prevData) => {
+      const updatedData = { ...prevData, [name]: value };
+      setEdited(true); // Mark as edited when there's any change
+      return updatedData;
+    });
   };
 
-  // Save changes and exit edit mode
+  // Save changes button (if you still want an explicit save)
   const handleSaveChanges = () => {
-    Swal.fire({
-      title: "Success!",
-      text: "Your profile has been updated.",
-      icon: "success",
-      confirmButtonText: "Okay",
-    });
-    setIsEditing(false);
-    setEdited(false);
+    setIsLoading(true); // Show loading modal
+
+    // Create a copy of userData with only the keys present in the original userData
+    const updatedData = Object.keys(userDataFromLocation).reduce((acc, key) => {
+      if (userData[key] !== userDataFromLocation[key]) {
+        acc[key] = userData[key]; // Only update the fields that have changed
+      }
+      return acc;
+    }, {});
+
+    // If there's any change to the data, update Firebase
+    if (Object.keys(updatedData).length > 0) {
+      const userRef = ref(database, "users/" + staticUid); // Update based on static UID
+      update(userRef, updatedData)
+        .then(() => {
+          Swal.fire({
+            title: "Success!",
+            text: "Your profile has been updated.",
+            icon: "success",
+            confirmButtonText: "Okay",
+          });
+          setIsEditing(false);
+          setEdited(false);
+        })
+        .catch((error) => {
+          console.error("Error updating data:", error); // Log error if update fails
+          Swal.fire({
+            title: "Error!",
+            text: "There was an issue updating your profile.",
+            icon: "error",
+            confirmButtonText: "Try Again",
+          });
+        })
+        .finally(() => {
+          setIsLoading(false); // Hide loading modal after the operation is done
+        });
+    } else {
+      Swal.fire({
+        title: "No Changes!",
+        text: "No changes were made to your profile.",
+        icon: "info",
+        confirmButtonText: "Okay",
+      });
+      setIsLoading(false);
+    }
   };
 
   // Toggle edit mode
@@ -109,6 +163,9 @@ const Profile = () => {
           </p>
         )}
       </div>
+
+      {/* Show Loading Modal if data is being saved */}
+      {isLoading && <LoadingModal />}
     </div>
   );
 };

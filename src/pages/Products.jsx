@@ -180,7 +180,7 @@ export default function Products() {
               <option value="Iced CofFee">Iced Coffee</option>
               <option value="Frappe">Frappe</option>
               <option value="Refreshments">Refreshments</option>
-              <option value="Croffles">Croffles-Baked Croissant</option>
+              <option value="Foods & Pastries">Foods & Pastries</option>
             </select>
           </div>
 

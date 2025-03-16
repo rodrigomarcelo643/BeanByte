@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { FaChevronRight, FaBars, FaTimes } from "react-icons/fa";
 import rightDesign from "../assets/rightDesign.png";
-import img1 from "../assets/bean1.png";
-import img2 from "../assets/bean2.png";
-import img3 from "../assets/bean3.png";
+import img1 from "../assets/img1.png";
+import img2 from "../assets/img2.png";
+import img3 from "../assets/img3.png";
 import leftChevron from "../assets/leftChevron.png";
 import rightChevron from "../assets/rightChevron.png";
 import logo from "../assets/main_logo.png";
@@ -236,7 +236,7 @@ const LandingPage = () => {
                     <img
                       src={img3}
                       alt="Profile 3"
-                      className="rounded-full w-25 h-25 object-cover"
+                      className="rounded-full w-20 h-20 object-cover"
                     />
                   </div>
                 </div>
