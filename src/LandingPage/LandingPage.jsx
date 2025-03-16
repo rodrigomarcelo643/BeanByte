@@ -11,7 +11,7 @@ import About from "./About";
 import Products from "./Products";
 import Support from "./Support";
 import Boxes from "./Boxes";
-import { motion } from "framer-motion"; // Import Framer Motion
+import { motion } from "framer-motion";
 import CustomerReview from "./CustomerReview";
 import Footer from "./Footer";
 
@@ -21,7 +21,7 @@ const LandingPage = () => {
   const [direction, setDirection] = useState("next");
   const [animationClass, setAnimationClass] = useState("");
   const [menuOpen, setMenuOpen] = useState(false);
-  const [isAutoPlay, setIsAutoPlay] = useState(true); // Track autoplay status
+  const [isAutoPlay, setIsAutoPlay] = useState(true);
   const images = [img1, img2, img3];
 
   const handleTabChange = (tab) => {
@@ -31,7 +31,7 @@ const LandingPage = () => {
   const nextImage = () => {
     setDirection("next");
     setCurrentIndex((prevIndex) => (prevIndex + 1) % images.length);
-    setIsAutoPlay(false); // Stop autoplay when interacting
+    setIsAutoPlay(false);
   };
 
   const prevImage = () => {
@@ -39,7 +39,7 @@ const LandingPage = () => {
     setCurrentIndex((prevIndex) =>
       prevIndex === 0 ? images.length - 1 : prevIndex - 1
     );
-    setIsAutoPlay(false); // Stop autoplay when interacting
+    setIsAutoPlay(false);
   };
 
   // Auto-play effect
@@ -50,7 +50,7 @@ const LandingPage = () => {
       }
     }, 5000); // Auto-play every 5 seconds
 
-    return () => clearInterval(autoPlayInterval); // Clear interval on component unmount
+    return () => clearInterval(autoPlayInterval);
   }, [isAutoPlay, currentIndex]);
 
   useEffect(() => {
@@ -68,8 +68,8 @@ const LandingPage = () => {
     // Start the autoplay after stopping it manually
     if (!isAutoPlay) {
       const timeoutId = setTimeout(() => {
-        setIsAutoPlay(true); // Resume autoplay after a brief pause
-      }, 4000); // Wait for 5 seconds before restarting autoplay
+        setIsAutoPlay(true);
+      }, 4000);
 
       return () => clearTimeout(timeoutId);
     }

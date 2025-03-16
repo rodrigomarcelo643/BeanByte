@@ -160,7 +160,7 @@ const AdminLogin = () => {
               <div className="mt-4 text-sm text-center">
                 <a
                   href="#"
-                  onClick={() => navigate("/LandingPage")}
+                  onClick={() => navigate("/ForgotPassword")}
                   className="text-[#b18b68] hover:underline"
                 >
                   Forgot Password?

@@ -21,12 +21,12 @@ const boxes = [
   {
     title: "Support",
     description:
-      "Customer support is the heart of our coffee shop—ensuring smooth visits, answering your questions, and delivering every cup with care. We're here to brighten your day, one sip at a time.",
+      "Need help? Our team is here for you! Whether it's order assistance or brewing tips, reach out via email, chat, or phone—we’ve got you covered.",
   },
   {
     title: "Sales",
     description:
-      "Customer support is the heart of our coffee shop—ensuring smooth visits, answering your questions, and delivering every cup with care. We're here to brighten your day, one sip at a time.",
+      "Discover premium coffee blends at Bean&Co. Enjoy bold espressos and smooth brews, with exclusive deals available. Shop now for fresh, quality coffee delivered to you!",
   },
   {
     title: "Process",

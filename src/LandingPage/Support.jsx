@@ -62,9 +62,8 @@ const Support = () => {
               </div>
               {isFAQOpen === 1 && (
                 <p className="mt-2 text-gray-600">
-                  You can track your order by visiting the "My Orders" section
-                  in your account. You will also receive an email with a
-                  tracking link once your order has been dispatched.
+                  You can track your order by contacting us at [store’s mobile
+                  number]. Our team will provide updates on your delivery.
                 </p>
               )}
             </div>
@@ -88,9 +87,8 @@ const Support = () => {
               </div>
               {isFAQOpen === 2 && (
                 <p className="mt-2 text-gray-600">
-                  We're sorry to hear that! Please contact our support team
-                  immediately with photos of the damage, and we'll assist you in
-                  resolving the issue.
+                  If your order is damaged, please contact us immediately with a
+                  photo of the item, and we’ll make it right.
                 </p>
               )}
             </div>
@@ -114,9 +112,8 @@ const Support = () => {
               </div>
               {isFAQOpen === 3 && (
                 <p className="mt-2 text-gray-600">
-                  You can change or cancel your order within 1 hour of placing
-                  it. After that, it will be processed and cannot be modified.
-                  Please reach out to us as soon as possible!
+                  Yes, but only before it’s prepared. Contact us as soon as
+                  possible to request changes or cancellation.
                 </p>
               )}
             </div>
