@@ -49,7 +49,7 @@ const DefaultPage = () => {
         <div className="flex justify-center space-x-6 flex-wrap sm:space-x-10">
           {/* Admin Box */}
           <div
-            className="flex flex-col items-center justify-center bg-[#f3f3f3] p-6 rounded-sm shadow-md cursor-pointer hover:bg-[#e0e0e0] transition-all duration-300 ease-in-out w-32 sm:w-48 md:w-56 border-2 border-[#724E2C]"
+            className="flex flex-col items-center justify-center bg-[#f3f3f3] p-6 rounded-sm shadow-md cursor-pointer hover:bg-[#e0e0e0] transition-all duration-300 ease-in-out w-32 sm:w-48 md:w-56 border-2 border-[#bd9d7f]"
             onClick={() => handleSelect("admin")}
           >
             <img
@@ -64,7 +64,7 @@ const DefaultPage = () => {
 
           {/* Customer Box */}
           <div
-            className="flex flex-col items-center justify-center bg-[#f3f3f3] p-6 rounded-sm shadow-md cursor-pointer hover:bg-[#e0e0e0] transition-all duration-300 ease-in-out w-32 sm:w-48 md:w-56 border-2 border-[#724E2C]"
+            className="flex flex-col items-center justify-center bg-[#f3f3f3] p-6 rounded-sm shadow-md cursor-pointer hover:bg-[#e0e0e0] transition-all duration-300 ease-in-out w-32 sm:w-48 md:w-56 border-2 border-[#bd9d7f]"
             onClick={() => handleSelect("customer")}
           >
             <img
