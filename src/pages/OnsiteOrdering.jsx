@@ -188,7 +188,7 @@ const OnsiteOrdering = ({ onBack }) => {
                   </td>
                   <td className="px-4 py-2">{order.items[0].quantity}</td>
                   <td className="px-9 py-2  ">
-                    ₱ {order.items[0].price.toFixed(2)}
+                    ₱ {parseFloat(order.items[0].price).toFixed(2)}
                   </td>
                   <td className="px-4 py-2">
                     ₱ {order.totalAmount.toFixed(2)}
@@ -277,7 +277,9 @@ const OnsiteOrdering = ({ onBack }) => {
                 >
                   <span>{item.productName}</span>
                   <span>
-                    {item.quantity} x ₱ {item.price.toFixed(2)}
+                    <span className="w-24 text-right">
+                      ₱ {parseFloat(item.price).toFixed(2)} X {item.quantity}
+                    </span>
                   </span>
                 </li>
               ))}

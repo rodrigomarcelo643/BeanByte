@@ -422,7 +422,7 @@ export default function AddOrder() {
                 <input
                   type="radio"
                   value="Takeout"
-                  checked={orderType === "Take-out"}
+                  checked={orderType === "Takeout"}
                   onChange={handleOrderTypeChange}
                 />{" "}
                 Take-out

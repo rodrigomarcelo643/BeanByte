@@ -176,10 +176,10 @@ export default function Products() {
               className="w-full h-12 border border-gray-300 rounded-md p-3 focus:outline-none focus:ring-2 focus:ring-[#724E2C] bg-gray-100 text-gray-700"
             >
               <option value="">Select Category</option>
-              <option value="Coffee">Hot Coffee</option>
-              <option value="Tea">Iced Coffee</option>
+              <option value="Hot Coffee">Hot Coffee</option>
+              <option value="Iced CofFee">Iced Coffee</option>
               <option value="Frappe">Frappe</option>
-              <option value="Frappe">Refreshments</option>
+              <option value="Refreshments">Refreshments</option>
               <option value="Croffles">Croffles-Baked Croissant</option>
             </select>
           </div>

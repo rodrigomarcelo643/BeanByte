@@ -96,8 +96,9 @@ const OnsitePaymentHistory = ({ onBack }) => {
             <thead>
               <tr className="text-white bg-[#724E2C]">
                 <th className="py-3 px-4 text-left">Total Amount</th>
-                <th className="py-3 px-4 text-left">Payment Method</th>
+
                 <th className="py-3 px-4 text-left">Status</th>
+                <th className="py-3 px-4 text-left">Payment Method</th>
                 <th className="py-3 px-4 text-left">Date</th>
                 <th className="py-3 px-4 text-left">Action</th>
               </tr>
@@ -108,7 +109,7 @@ const OnsitePaymentHistory = ({ onBack }) => {
                   <td className="py-3 px-4">
                     ₱ {order.totalAmount.toFixed(2)}
                   </td>
-                  <td className="py-3 px-4">{order.paymentMethod}</td>
+
                   <td className="py-3 px-4">
                     <span
                       className={`${
@@ -118,6 +119,7 @@ const OnsitePaymentHistory = ({ onBack }) => {
                       {order.status}
                     </span>
                   </td>
+                  <td className="py-3 px-4">{order.paymentMethod}</td>
                   <td className="py-3 px-4">
                     {new Date(order.createdAt.seconds * 1000).toLocaleString()}
                   </td>
@@ -165,10 +167,6 @@ const OnsitePaymentHistory = ({ onBack }) => {
               <div>
                 <strong>Status:</strong> {selectedOrder.status}
               </div>
-              <div>
-                <strong>Total Amount:</strong> ₱{" "}
-                {selectedOrder.totalAmount.toFixed(2)}
-              </div>
             </div>
 
             <div className="my-4 border-t-2 border-dashed border-gray-300"></div>
@@ -179,13 +177,18 @@ const OnsitePaymentHistory = ({ onBack }) => {
               {selectedOrder.items.map((item, index) => (
                 <div key={index}>
                   <p>
-                    {item.productName} x{item.quantity}
+                    {item.productName} x {item.quantity} = ₱{" "}
+                    {parseFloat(item.price).toFixed(2)}
                   </p>
-                  <p>₱ {item.price.toFixed(2)}</p>
                 </div>
               ))}
             </div>
-
+            <div>
+              <div className="my-4 border-t-2 border-dashed border-gray-300"></div>
+              <strong>Total Amount:</strong> ₱{" "}
+              {selectedOrder.totalAmount.toFixed(2)}
+            </div>
+            <div className="my-4 border-t-2 border-dashed border-gray-300"></div>
             <div className="my-4 border-t-2 border-dashed border-gray-300"></div>
 
             <div className="space-y-2">

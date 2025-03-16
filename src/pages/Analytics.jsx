@@ -32,7 +32,7 @@ const Analytics = () => {
     month: [],
     year: [],
   });
-  const [filter, setFilter] = useState("month");
+  const [filter, setFilter] = useState("day");
   const [loading, setLoading] = useState(true);
 
   // Fetch data from Firestore
@@ -231,7 +231,7 @@ const Analytics = () => {
           className="px-4 py-2 bg-[#724E2C] hover:bg-[#a79482] text-white rounded mb-4 sm:mb-0"
           onClick={() => setFilter("year")}
         >
-          Year
+          Annual
         </button>
       </div>
 
