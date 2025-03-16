@@ -8,13 +8,14 @@ import { auth, database } from "../../config/firebase";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { ref, get } from "firebase/database";
 import coffeeGif from "../assets/coffee.gif";
+
 const LoadingModal = () => (
   <div className="fixed inset-0 bg-[rgba(0,0,0,0.3)] flex justify-center items-center z-999">
     <div className="bg-white rounded-lg flex flex-col justify-center items-center">
       <img src={coffeeGif} className="w-60 h-60" />
-      <p className="mt-4 text-[#724E2C] text-xl  relative top-[-80px] tefont-semibold">
+      <p className="mt-4 text-[#724E2C] text-xl  relative top-[-80px] font-semibold">
         Bean&Co....
-      </p>{" "}
+      </p>
     </div>
   </div>
 );
@@ -32,9 +33,11 @@ const AdminLogin = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
   };
+
   function dashboardNavigate(userData) {
     navigate("/Bean&Co.Admin", { state: { userData } });
   }
+
   const handleLogin = async () => {
     setUsernameError("");
     setPasswordError("");
@@ -95,77 +98,73 @@ const AdminLogin = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 text-gray-900 flex justify-center">
-      <div className="max-w-screen-xl m-0 sm:m-10 bg-white shadow sm:rounded-lg flex justify-center flex-1">
+    <div className="min-h-screen bg-gray-100 text-gray-900 flex justify-center items-center">
+      {" "}
+      {/* This centers the whole content */}
+      <div className="max-w-screen-xl w-full sm:m-10 bg-white shadow sm:rounded-lg flex justify-center flex-1">
         {/* Left side (Login form) */}
-        <div className="lg:w-1/2 xl:w-5/12 p-6 sm:p-12">
+        <div className="lg:w-1/2 xl:w-5/12 p-6 sm:p-12 flex flex-col items-center">
           <div className="flex justify-center items-center">
             <img src={logo} className="w-26 h-26" alt="Logo" />
           </div>
 
-          <div className="mt-12 flex flex-col items-center">
-            <div className="w-full flex-1">
-              <form onSubmit={handleSubmit} className="mx-auto max-w-xs">
-                <div className="relative">
-                  <input
-                    className="w-full px-9.5 py-4 rounded-lg font-medium bg-gray-100 border border-gray-200 placeholder-gray-500 text-sm focus:outline-none focus:border-gray-400 focus:bg-white"
-                    type="text"
-                    placeholder="Username or Email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                  />
-                  <div className="absolute left-3 top-4">
-                    <FaUserAlt className="text-[#724E2C] text-[18px]" />
-                  </div>
-                  {/* Display username error message */}
-                  {usernameError && (
-                    <p className="text-red-500 text-sm mt-1">{usernameError}</p>
-                  )}
+          <div className="mt-12 flex flex-col items-center w-full">
+            <form onSubmit={handleSubmit} className="mx-auto max-w-xs w-full">
+              <div className="relative">
+                <input
+                  className="w-full px-9.5 py-4 rounded-lg font-medium bg-gray-100 border border-gray-200 placeholder-gray-500 text-sm focus:outline-none focus:border-gray-400 focus:bg-white"
+                  type="text"
+                  placeholder="Username or Email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                />
+                <div className="absolute left-3 top-4">
+                  <FaUserAlt className="text-[#724E2C] text-[18px]" />
                 </div>
-
-                <div className="relative mt-5">
-                  <input
-                    className="w-full px-9.5 py-4 rounded-lg font-medium bg-gray-100 border border-gray-200 placeholder-gray-500 text-sm focus:outline-none focus:border-gray-400 focus:bg-white"
-                    type="password"
-                    placeholder="Password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                  />
-                  <div className="absolute left-2 top-3">
-                    <img src={passwordIcon} alt="Password Icon" />
-                  </div>
-                  {/* Display password error message */}
-                  {passwordError && (
-                    <p className="text-red-500 text-sm mt-1">{passwordError}</p>
-                  )}
-                </div>
-
-                <button
-                  type="button"
-                  onClick={handleLogin}
-                  className="mt-5 tracking-wide font-semibold bg-[#b18b68] cursor-pointer text-white-500 w-full py-4 rounded-lg hover:bg-[#724E2C] transition-all duration-300 ease-in-out flex items-center justify-center focus:shadow-outline focus:outline-none"
-                >
-                  <span className="ml-1 text-md text-white">Sign In</span>
-                </button>
-
-                {/* Show loading modal if loading is true */}
-                {loading && <LoadingModal />}
-
-                {error && <p className="text-red-500 mt-4">{error}</p>}
-                {notFoundError && (
-                  <p className="text-red-500 mt-4">{notFoundError}</p>
+                {usernameError && (
+                  <p className="text-red-500 text-sm mt-1">{usernameError}</p>
                 )}
-              </form>
-
-              <div className="mt-4 text-sm text-center">
-                <a
-                  href="#"
-                  onClick={() => navigate("/ForgotPassword")}
-                  className="text-[#b18b68] hover:underline"
-                >
-                  Forgot Password?
-                </a>
               </div>
+
+              <div className="relative mt-5">
+                <input
+                  className="w-full px-9.5 py-4 rounded-lg font-medium bg-gray-100 border border-gray-200 placeholder-gray-500 text-sm focus:outline-none focus:border-gray-400 focus:bg-white"
+                  type="password"
+                  placeholder="Password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                />
+                <div className="absolute left-2 top-3">
+                  <img src={passwordIcon} alt="Password Icon" />
+                </div>
+                {passwordError && (
+                  <p className="text-red-500 text-sm mt-1">{passwordError}</p>
+                )}
+              </div>
+
+              <button
+                type="button"
+                onClick={handleLogin}
+                className="mt-5 tracking-wide font-semibold bg-[#b18b68] cursor-pointer text-white-500 w-full py-4 rounded-lg hover:bg-[#724E2C] transition-all duration-300 ease-in-out flex items-center justify-center focus:shadow-outline focus:outline-none"
+              >
+                <span className="ml-1 text-md text-white">Sign In</span>
+              </button>
+
+              {loading && <LoadingModal />}
+              {error && <p className="text-red-500 mt-4">{error}</p>}
+              {notFoundError && (
+                <p className="text-red-500 mt-4">{notFoundError}</p>
+              )}
+            </form>
+
+            <div className="mt-4 text-sm text-center">
+              <a
+                href="#"
+                onClick={() => navigate("/ForgotPassword")}
+                className="text-[#b18b68] hover:underline"
+              >
+                Forgot Password?
+              </a>
             </div>
           </div>
         </div>
