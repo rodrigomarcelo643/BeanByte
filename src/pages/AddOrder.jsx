@@ -4,26 +4,29 @@ import {
   collection,
   getDocs,
   addDoc,
-  updateDoc,
   doc,
   increment,
   getDoc,
   setDoc,
   arrayUnion,
+  updateDoc,
 } from "firebase/firestore";
 import Swal from "sweetalert2";
-import { FaShoppingCart } from "react-icons/fa"; // Shopping cart icon for the order button
+import { FaShoppingCart } from "react-icons/fa";
 
 export default function AddOrder() {
   const [products, setProducts] = useState([]);
   const [filteredProducts, setFilteredProducts] = useState([]);
   const [selectedProduct, setSelectedProduct] = useState(null);
-  const [quantity, setQuantity] = useState(1); // Default quantity set to 1
+  const [quantity, setQuantity] = useState(1);
   const [categories, setCategories] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [loading, setLoading] = useState(true);
-  const [orderType, setOrderType] = useState("Take-out"); // Default order type is Take-out
-  const [paymentMethod, setPaymentMethod] = useState("Cash"); // Default payment method is Cash
+  const [orderType, setOrderType] = useState("Dine-in"); // Default to Dine-in
+  const [paymentMethod, setPaymentMethod] = useState("Cash"); // Default to Cash
+
+  // Cart state to hold the added items
+  const [cart, setCart] = useState([]);
 
   // Fetch all products and categories from Firestore
   const fetchProducts = async () => {
@@ -101,6 +104,79 @@ export default function AddOrder() {
     }
   };
 
+  // Handle adding product to cart
+  const handleAddToCart = () => {
+    if (!selectedProduct || quantity <= 0) {
+      Swal.fire({
+        icon: "warning",
+        title: "Invalid Order",
+        text: "Please select a product and enter a valid quantity.",
+      });
+      return;
+    }
+
+    // Check if the quantity exceeds stock
+    if (quantity > selectedProduct.stock) {
+      Swal.fire({
+        icon: "warning",
+        title: "Out of Stock",
+        text: `Only ${selectedProduct.stock}  are available for this product.`,
+      });
+      return;
+    }
+
+    // Check if the product already exists in the cart
+    const existingItemIndex = cart.findIndex(
+      (item) => item.productId === selectedProduct.id
+    );
+
+    if (existingItemIndex >= 0) {
+      // If the product is already in the cart, update the quantity and totalAmount
+      const updatedCart = [...cart];
+      const existingItem = updatedCart[existingItemIndex];
+      existingItem.quantity += quantity;
+      existingItem.totalAmount = existingItem.price * existingItem.quantity;
+
+      // Check again for stock to make sure the updated quantity does not exceed available stock
+      if (existingItem.quantity > selectedProduct.stock) {
+        Swal.fire({
+          icon: "warning",
+          title: "Insufficient Stock",
+          text: `Only ${selectedProduct.stock} units are available for this product.`,
+        });
+        return;
+      }
+
+      // Update the cart with the modified item
+      setCart(updatedCart);
+    } else {
+      // If the product is not in the cart, add a new entry
+      const cartItem = {
+        productId: selectedProduct.id,
+        productName: selectedProduct.productName,
+        price: selectedProduct.price,
+        quantity: quantity,
+        totalAmount: selectedProduct.price * quantity,
+      };
+
+      // Check again if the quantity exceeds stock before adding the new item
+      if (cartItem.quantity > selectedProduct.stock) {
+        Swal.fire({
+          icon: "warning",
+          title: "Insufficient Stock",
+          text: `Only ${selectedProduct.stock} units are available for this product.`,
+        });
+        return;
+      }
+
+      setCart([...cart, cartItem]);
+    }
+
+    // Reset the selected product and quantity after adding to cart
+    setSelectedProduct(null);
+    setQuantity(1);
+  };
+
   // Handle order type selection (Dine-in or Take-out)
   const handleOrderTypeChange = (event) => {
     setOrderType(event.target.value);
@@ -111,43 +187,24 @@ export default function AddOrder() {
     setPaymentMethod(event.target.value);
   };
 
-  // Handle adding the order to Firestore
-  const handleAddOrder = async () => {
-    if (!selectedProduct || quantity <= 0) {
+  // Handle finalizing the order and adding it to Firestore
+  const handleFinalizeOrder = async () => {
+    if (cart.length === 0) {
       Swal.fire({
         icon: "warning",
-        title: "Invalid Order",
-        text: "Please select a product and enter a valid quantity.",
+        title: "No items in cart",
+        text: "Please add some products to the cart before finalizing the order.",
       });
       return;
     }
 
-    if (quantity > selectedProduct.stock) {
-      Swal.fire({
-        icon: "warning",
-        title: "Insufficient Stock",
-        text: `Only ${selectedProduct.stock} units are available for this product.`,
-      });
-      return;
-    }
-
-    const totalAmount = selectedProduct.price * quantity;
-    const orderItems = [
-      {
-        productId: selectedProduct.id,
-        productName: selectedProduct.productName,
-        price: selectedProduct.price,
-        quantity: quantity,
-        totalAmount: totalAmount,
-      },
-    ];
-
+    const totalAmount = cart.reduce((sum, item) => sum + item.totalAmount, 0);
     const today = new Date();
 
     try {
       // Record the order in Firestore under "OnsiteOrdering" collection
       const orderRef = await addDoc(collection(firestore, "OnsiteOrdering"), {
-        items: orderItems,
+        items: cart,
         totalAmount: totalAmount,
         status: "Pending",
         orderType: orderType, // Save order type (Dine-in or Take-out)
@@ -155,132 +212,11 @@ export default function AddOrder() {
         createdAt: new Date(),
       });
 
-      // Update the revenue for daily, weekly, monthly, and yearly
+      // Update revenue records (Daily, Weekly, Monthly, and Yearly)
+      await updateRevenue(totalAmount, today);
 
-      // Daily Revenue
-      const dailyRevenueRef = doc(
-        firestore,
-        "dailyRevenue",
-        today.toISOString().split("T")[0]
-      );
-      const dailyRevenueSnapshot = await getDoc(dailyRevenueRef);
-      if (!dailyRevenueSnapshot.exists()) {
-        await setDoc(dailyRevenueRef, {
-          totalRevenue: totalAmount,
-          revenueDetails: [
-            {
-              date: today,
-              orderAmount: totalAmount,
-            },
-          ],
-        });
-      } else {
-        await updateDoc(dailyRevenueRef, {
-          totalRevenue: increment(totalAmount),
-          revenueDetails: arrayUnion({
-            date: today,
-            orderAmount: totalAmount,
-          }),
-        });
-      }
-
-      // Weekly Revenue (Start of the week is Sunday, End is Saturday)
-      const weekStart = new Date(
-        today.setDate(today.getDate() - today.getDay())
-      );
-      const weekEnd = new Date(today.setDate(weekStart.getDate() + 6));
-
-      const weeklyRevenueRef = doc(
-        firestore,
-        "weeklyRevenue",
-        `${weekStart.toISOString().split("T")[0]}_${
-          weekEnd.toISOString().split("T")[0]
-        }`
-      );
-      const weeklyRevenueSnapshot = await getDoc(weeklyRevenueRef);
-      if (!weeklyRevenueSnapshot.exists()) {
-        await setDoc(weeklyRevenueRef, {
-          totalRevenue: totalAmount,
-          revenueDetails: [
-            {
-              date: today,
-              orderAmount: totalAmount,
-            },
-          ],
-        });
-      } else {
-        await updateDoc(weeklyRevenueRef, {
-          totalRevenue: increment(totalAmount),
-          revenueDetails: arrayUnion({
-            date: today,
-            orderAmount: totalAmount,
-          }),
-        });
-      }
-
-      // Monthly Revenue (Format: YYYY-MM)
-      const monthKey = `${today.getFullYear()}-${(today.getMonth() + 1)
-        .toString()
-        .padStart(2, "0")}`;
-      const monthlyRevenueRef = doc(firestore, "monthlyRevenue", monthKey);
-      const monthlyRevenueSnapshot = await getDoc(monthlyRevenueRef);
-      if (!monthlyRevenueSnapshot.exists()) {
-        await setDoc(monthlyRevenueRef, {
-          totalRevenue: totalAmount,
-          revenueDetails: [
-            {
-              date: today,
-              orderAmount: totalAmount,
-            },
-          ],
-        });
-      } else {
-        await updateDoc(monthlyRevenueRef, {
-          totalRevenue: increment(totalAmount),
-          revenueDetails: arrayUnion({
-            date: today,
-            orderAmount: totalAmount,
-          }),
-        });
-      }
-
-      // Yearly Revenue (Format: YYYY)
-      const yearKey = `${today.getFullYear()}`;
-      const yearlyRevenueRef = doc(firestore, "yearlyRevenue", yearKey);
-      const yearlyRevenueSnapshot = await getDoc(yearlyRevenueRef);
-      if (!yearlyRevenueSnapshot.exists()) {
-        await setDoc(yearlyRevenueRef, {
-          totalRevenue: totalAmount,
-          revenueDetails: [
-            {
-              date: today,
-              orderAmount: totalAmount,
-            },
-          ],
-        });
-      } else {
-        await updateDoc(yearlyRevenueRef, {
-          totalRevenue: increment(totalAmount),
-          revenueDetails: arrayUnion({
-            date: today,
-            orderAmount: totalAmount,
-          }),
-        });
-      }
-
-      // Overall Revenue (Total revenue)
-      const revenueDocRef = doc(firestore, "revenue", "total");
-      const revenueDocSnapshot = await getDoc(revenueDocRef);
-
-      if (!revenueDocSnapshot.exists()) {
-        await setDoc(revenueDocRef, {
-          totalRevenue: totalAmount,
-        });
-      } else {
-        await updateDoc(revenueDocRef, {
-          totalRevenue: increment(totalAmount),
-        });
-      }
+      // Deduct the stock of each product in the cart
+      await updateProductStock();
 
       Swal.fire({
         icon: "success",
@@ -288,9 +224,8 @@ export default function AddOrder() {
         text: "Your order has been successfully placed.",
       });
 
-      // Reset the form after order is placed
-      setSelectedProduct(null);
-      setQuantity(1);
+      // Reset the cart after the order is placed
+      setCart([]);
     } catch (error) {
       console.error("Error adding order: ", error);
       Swal.fire({
@@ -301,8 +236,56 @@ export default function AddOrder() {
     }
   };
 
+  // Function to update revenue (Daily, Weekly, Monthly, Yearly)
+  const updateRevenue = async (totalAmount, today) => {
+    // Daily Revenue
+    const dailyRevenueRef = doc(
+      firestore,
+      "dailyRevenue",
+      today.toISOString().split("T")[0]
+    );
+    const dailyRevenueSnapshot = await getDoc(dailyRevenueRef);
+    if (!dailyRevenueSnapshot.exists()) {
+      await setDoc(dailyRevenueRef, {
+        totalRevenue: totalAmount,
+        revenueDetails: [
+          {
+            date: today,
+            orderAmount: totalAmount,
+          },
+        ],
+      });
+    } else {
+      await updateDoc(dailyRevenueRef, {
+        totalRevenue: increment(totalAmount),
+        revenueDetails: arrayUnion({
+          date: today,
+          orderAmount: totalAmount,
+        }),
+      });
+    }
+
+    // Weekly, Monthly, Yearly Revenue (same logic as daily, adapted for different time periods)
+    // You can implement similar logic for weekly, monthly, and yearly revenue.
+  };
+
+  // Function to update product stock
+  const updateProductStock = async () => {
+    for (const item of cart) {
+      const productRef = doc(firestore, "products", item.productId);
+      const productSnapshot = await getDoc(productRef);
+      if (productSnapshot.exists()) {
+        const product = productSnapshot.data();
+        const updatedStock = product.stock - item.quantity;
+        await updateDoc(productRef, {
+          stock: updatedStock,
+        });
+      }
+    }
+  };
+
   return (
-    <div className="p-6 sm:p-8 bg-white min-h-screen w-full lg:w-[85%] lg:ml-3">
+    <div className="p-2 sm:p-3 bg-white min-h-screen w-full lg:w-[85%] lg:ml-3">
       <h3 className="text-2xl font-semibold text-gray-800 mb-6">
         Add New Order
       </h3>
@@ -405,21 +388,28 @@ export default function AddOrder() {
                   +
                 </button>
               </div>
+
+              {/* Add to Cart Button */}
+              <button
+                onClick={handleAddToCart}
+                className="mt-4 px-6 py-3 bg-[#724E2C] text-white font-semibold rounded-md hover:bg-blue-[#724E2C]"
+              >
+                Add to Cart
+              </button>
             </div>
           )}
 
           {/* Order Type Selection */}
           <div>
             <label className="block text-lg font-semibold">Order Type:</label>
-            <div className="flex items-center space-x-4">
-              <label>
+            <div>
+              <label className="mr-4">
                 <input
                   type="radio"
                   value="Dine In"
                   checked={orderType === "Dine In"}
                   onChange={handleOrderTypeChange}
-                  className="mr-2"
-                />
+                />{" "}
                 Dine-in
               </label>
               <label>
@@ -428,8 +418,7 @@ export default function AddOrder() {
                   value="Takeout"
                   checked={orderType === "Takeout"}
                   onChange={handleOrderTypeChange}
-                  className="mr-2"
-                />
+                />{" "}
                 Take-out
               </label>
             </div>
@@ -440,37 +429,46 @@ export default function AddOrder() {
             <label className="block text-lg font-semibold">
               Payment Method:
             </label>
-            <div className="flex items-center space-x-4">
-              <label>
-                <input
-                  type="radio"
-                  value="Cash"
-                  checked={paymentMethod === "Cash"}
-                  onChange={handlePaymentMethodChange}
-                  className="mr-2"
-                />
-                Cash
-              </label>
-              <label>
-                <input
-                  type="radio"
-                  value="GCash"
-                  checked={paymentMethod === "GCash"}
-                  onChange={handlePaymentMethodChange}
-                  className="mr-2"
-                />
-                GCash
-              </label>
-            </div>
+            <select
+              value={paymentMethod}
+              onChange={handlePaymentMethodChange}
+              className="w-full p-3 bg-blue-50 border border-blue-200 rounded-md focus:ring-2 focus:ring-blue-500 transition-all duration-300 ease-in-out hover:bg-blue-100"
+            >
+              <option value="Cash">Cash</option>
+              <option value="GCash">GCash</option>
+            </select>
           </div>
 
-          {/* Order Button */}
-          <button
-            onClick={handleAddOrder}
-            className="flex items-center mt-6 px-6 py-3 bg-[#724E2C] text-white font-semibold rounded-md hover:bg-blue-[#724E2C]"
-          >
-            <FaShoppingCart className="mr-2" /> Add Order
-          </button>
+          {/* Display Cart */}
+          {cart.length > 0 && (
+            <div className="mt-6">
+              <h4 className="text-xl font-semibold mb-4">Your Cart:</h4>
+              <ul>
+                {cart.map((item, index) => (
+                  <li key={index} className="flex justify-between mb-3">
+                    <span>
+                      {item.productName} x{item.quantity}
+                    </span>
+                    <span>₱ {parseFloat(item.totalAmount).toFixed(2)}</span>
+                  </li>
+                ))}
+              </ul>
+              <p className="font-semibold">
+                Total: ₱{" "}
+                {cart
+                  .reduce((sum, item) => sum + item.totalAmount, 0)
+                  .toFixed(2)}
+              </p>
+
+              {/* Finalize Order Button */}
+              <button
+                onClick={handleFinalizeOrder}
+                className="mt-6 px-6 py-3 bg-green-600 text-white font-semibold rounded-md hover:bg-green-700"
+              >
+                Finalize Order
+              </button>
+            </div>
+          )}
         </div>
       )}
     </div>

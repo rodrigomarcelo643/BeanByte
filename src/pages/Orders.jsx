@@ -4,11 +4,15 @@ import {
   collection,
   getDocs,
   doc,
+  addDoc,
   updateDoc,
   deleteDoc,
   query,
   where,
   setDoc,
+  limit,
+  startAfter,
+  orderBy,
 } from "firebase/firestore";
 import Swal from "sweetalert2";
 import { FaTimesCircle } from "react-icons/fa";
@@ -22,20 +26,36 @@ export default function Orders() {
   const [viewPaymentProofUrl, setViewPaymentProofUrl] = useState("");
   const [showOnsiteOrdering, setShowOnsiteOrdering] = useState(false);
 
+  // Pagination State
+  const [currentPage, setCurrentPage] = useState(1);
+  const [lastVisible, setLastVisible] = useState(null);
+  const ordersPerPage = 5;
+
   useEffect(() => {
     fetchOrders();
-  }, []);
+  }, [currentPage]);
 
   const fetchOrders = async () => {
     setLoading(true);
     try {
-      const q = collection(firestore, "customerorders");
-      const querySnapshot = await getDocs(q);
+      const q = query(
+        collection(firestore, "customerorders"),
+        orderBy("timestamp", "desc"), // Sorting by timestamp (or other field you prefer)
+        limit(ordersPerPage)
+      );
+
+      // If we have a lastVisible document, start after it
+      const ordersQuery = lastVisible ? query(q, startAfter(lastVisible)) : q;
+
+      const querySnapshot = await getDocs(ordersQuery);
       const ordersList = querySnapshot.docs.map((doc) => ({
         id: doc.id,
         ...doc.data(),
       }));
+
+      // Update pagination state
       setOrders(ordersList);
+      setLastVisible(querySnapshot.docs[querySnapshot.docs.length - 1]);
     } catch (error) {
       console.error("Error fetching orders:", error);
       Swal.fire({
@@ -196,6 +216,17 @@ export default function Orders() {
 
   const groupedOrders = groupOrdersByReference();
 
+  // Pagination Control Functions
+  const handleNextPage = () => {
+    setCurrentPage((prevPage) => prevPage + 1);
+  };
+
+  const handlePrevPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage((prevPage) => prevPage - 1);
+    }
+  };
+
   return (
     <div className="p-6 sm:p-8 bg-gray-50 min-h-screen w-full lg:w-[85%]">
       {showOnsiteOrdering ? (
@@ -213,7 +244,7 @@ export default function Orders() {
               Onsite Ordering
             </button>
           </div>
-          <div className="flex  mb-4">
+          <div className="flex mb-4">
             {["Pickup", "Takeout"].map((tab) => (
               <button
                 key={tab}
@@ -338,118 +369,23 @@ export default function Orders() {
             </div>
           )}
 
-          {viewOrder && (
-            <div className="fixed inset-0 bg-[rgba(0,0,0,0.4)] flex justify-center items-center z-999">
-              <div className="bg-white p-8 max-w-4xl w-full h-full rounded-lg shadow-lg overflow-auto">
-                <button
-                  onClick={handleCloseModal}
-                  className="text-xl text-gray-500 cursor-pointer float-right"
-                >
-                  <FaTimesCircle />
-                </button>
-                <h2 className="text-2xl font-bold mb-6">Order Details</h2>
-                <div className="space-y-6">
-                  <div className="border-b border-dashed border-gray-300 pb-4 flex items-center space-x-4">
-                    <i className="fas fa-hashtag text-gray-600"></i>
-                  </div>
-                  <div className="border-b border-dashed border-gray-300 pb-6">
-                    <h3 className="text-xl font-semibold mb-4 flex items-center space-x-3">
-                      <i className="fas fa-box-open text-gray-600"></i>
-                      <span>Products</span>
-                    </h3>
-                    {viewOrder.map((order, index) => (
-                      <div key={index} className="mb-4">
-                        <div className="flex items-center space-x-3 mb-2">
-                          <i className="fas fa-cogs text-gray-500"></i>
-                          <p className="text-sm">
-                            <strong>Product:</strong> {order.product}
-                          </p>
-                        </div>
-                        <div className="flex items-center space-x-3 mb-2">
-                          <i className="fas fa-sort-numeric-up text-gray-500"></i>
-                          <p className="text-sm">
-                            <strong>Quantity:</strong> {order.quantity}
-                          </p>
-                        </div>
-                        <div className="flex items-center space-x-3">
-                          <i className="fas fa-money-bill-wave text-gray-500"></i>
-                          <p className="text-sm">
-                            <strong>Total Price:</strong> ₱{" "}
-                            {parseFloat(order.price * order.quantity).toFixed(
-                              2
-                            )}
-                          </p>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-
-                  <div className="flex space-x-8">
-                    <div className="flex-1 border-b border-dashed border-gray-300 pb-6">
-                      <h3 className="text-xl font-semibold mb-4 flex items-center space-x-3">
-                        <i className="fas fa-user text-gray-600"></i>
-                        <span>Customer Information</span>
-                      </h3>
-                      <div className="flex items-center space-x-3 mb-3">
-                        <i className="fas fa-user-tag text-gray-500"></i>
-                        <p className="text-sm">
-                          <strong>Customer Name:</strong>{" "}
-                          {viewOrder[0].fullName}
-                        </p>
-                      </div>
-                      <div className="flex items-center space-x-3 mb-3">
-                        <i className="fas fa-info-circle text-gray-500"></i>
-                        <p className="text-sm">
-                          <strong>Status:</strong> {viewOrder[0].status}
-                        </p>
-                      </div>
-                      <div className="flex items-center space-x-3 mb-3">
-                        <i className="fas fa-map-marker-alt text-gray-500"></i>
-                        <p className="text-sm">
-                          <strong>Address:</strong> {viewOrder[0].address}
-                        </p>
-                      </div>
-                      <div className="flex items-center space-x-3">
-                        <i className="fas fa-phone-alt text-gray-500"></i>
-                        <p className="text-sm">
-                          <strong>Contact:</strong> {viewOrder[0].contactNumber}
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="flex-1 border-b border-dashed border-gray-300 pb-6">
-                      <h3 className="text-xl font-semibold mb-4 flex items-center space-x-3">
-                        <i className="fas fa-credit-card text-gray-600"></i>
-                        <span>Payment Information</span>
-                      </h3>
-                      <div className="flex items-center space-x-3 mb-3">
-                        <i className="fas fa-credit-card text-gray-500"></i>
-                        <p className="text-sm">
-                          <strong>Payment Mode:</strong>{" "}
-                          {viewOrder[0].paymentMode}
-                        </p>
-                      </div>
-                      {viewOrder[0].paymentProofUrl && (
-                        <div className="flex items-center space-x-3 mb-3">
-                          <i className="fas fa-image text-gray-500"></i>
-                          <p
-                            className="text-sm text-blue-500 cursor-pointer"
-                            onClick={() =>
-                              handleViewPaymentProof(
-                                viewOrder[0].paymentProofUrl
-                              )
-                            }
-                          >
-                            <strong>View Payment Proof</strong>
-                          </p>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
+          {/* Pagination Controls */}
+          <div className="flex justify-center space-x-3 mt-4">
+            <button
+              className="px-4 py-2 bg-gray-300 text-black rounded-md"
+              onClick={handlePrevPage}
+              disabled={currentPage === 1}
+            >
+              Prev
+            </button>
+            <span className="self-center text-lg">{`Page ${currentPage}`}</span>
+            <button
+              className="px-4 py-2 bg-gray-300 text-black rounded-md"
+              onClick={handleNextPage}
+            >
+              Next
+            </button>
+          </div>
 
           {/* Modal for Payment Proof */}
           {viewPaymentProofUrl && (
@@ -473,6 +409,112 @@ export default function Orders() {
             </div>
           )}
         </>
+      )}
+      {viewOrder && (
+        <div className="fixed inset-0 bg-[rgba(0,0,0,0.4)] flex justify-center items-center z-999">
+          <div className="bg-white p-8 max-w-4xl w-full h-full rounded-lg shadow-lg overflow-auto">
+            <button
+              onClick={handleCloseModal}
+              className="text-xl text-gray-500 cursor-pointer float-right"
+            >
+              <FaTimesCircle />
+            </button>
+            <h2 className="text-2xl font-bold mb-6">Order Details</h2>
+            <div className="space-y-6">
+              <div className="border-b border-dashed border-gray-300 pb-4 flex items-center space-x-4">
+                <i className="fas fa-hashtag text-gray-600"></i>
+              </div>
+              <div className="border-b border-dashed border-gray-300 pb-6">
+                <h3 className="text-xl font-semibold mb-4 flex items-center space-x-3">
+                  <i className="fas fa-box-open text-gray-600"></i>
+                  <span>Products</span>
+                </h3>
+                {viewOrder.map((order, index) => (
+                  <div key={index} className="mb-4">
+                    <div className="flex items-center space-x-3 mb-2">
+                      <i className="fas fa-cogs text-gray-500"></i>
+                      <p className="text-sm">
+                        <strong>Product:</strong> {order.product}
+                      </p>
+                    </div>
+                    <div className="flex items-center space-x-3 mb-2">
+                      <i className="fas fa-sort-numeric-up text-gray-500"></i>
+                      <p className="text-sm">
+                        <strong>Quantity:</strong> {order.quantity}
+                      </p>
+                    </div>
+                    <div className="flex items-center space-x-3">
+                      <i className="fas fa-money-bill-wave text-gray-500"></i>
+                      <p className="text-sm">
+                        <strong>Total Price:</strong> ₱{" "}
+                        {parseFloat(order.price * order.quantity).toFixed(2)}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="flex space-x-8">
+                <div className="flex-1 border-b border-dashed border-gray-300 pb-6">
+                  <h3 className="text-xl font-semibold mb-4 flex items-center space-x-3">
+                    <i className="fas fa-user text-gray-600"></i>
+                    <span>Customer Information</span>
+                  </h3>
+                  <div className="flex items-center space-x-3 mb-3">
+                    <i className="fas fa-user-tag text-gray-500"></i>
+                    <p className="text-sm">
+                      <strong>Customer Name:</strong> {viewOrder[0].fullName}
+                    </p>
+                  </div>
+                  <div className="flex items-center space-x-3 mb-3">
+                    <i className="fas fa-info-circle text-gray-500"></i>
+                    <p className="text-sm">
+                      <strong>Status:</strong> {viewOrder[0].status}
+                    </p>
+                  </div>
+                  <div className="flex items-center space-x-3 mb-3">
+                    <i className="fas fa-map-marker-alt text-gray-500"></i>
+                    <p className="text-sm">
+                      <strong>Address:</strong> {viewOrder[0].address}
+                    </p>
+                  </div>
+                  <div className="flex items-center space-x-3">
+                    <i className="fas fa-phone-alt text-gray-500"></i>
+                    <p className="text-sm">
+                      <strong>Contact:</strong> {viewOrder[0].contactNumber}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex-1 border-b border-dashed border-gray-300 pb-6">
+                  <h3 className="text-xl font-semibold mb-4 flex items-center space-x-3">
+                    <i className="fas fa-credit-card text-gray-600"></i>
+                    <span>Payment Information</span>
+                  </h3>
+                  <div className="flex items-center space-x-3 mb-3">
+                    <i className="fas fa-credit-card text-gray-500"></i>
+                    <p className="text-sm">
+                      <strong>Payment Mode:</strong> {viewOrder[0].paymentMode}
+                    </p>
+                  </div>
+                  {viewOrder[0].paymentProofUrl && (
+                    <div className="flex items-center space-x-3 mb-3">
+                      <i className="fas fa-image text-gray-500"></i>
+                      <p
+                        className="text-sm text-blue-500 cursor-pointer"
+                        onClick={() =>
+                          handleViewPaymentProof(viewOrder[0].paymentProofUrl)
+                        }
+                      >
+                        <strong>View Payment Proof</strong>
+                      </p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

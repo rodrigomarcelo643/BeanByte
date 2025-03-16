@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { firestore } from "../../config/firebase";
-import { collection, getDocs } from "firebase/firestore";
+import { collection, getDocs, deleteDoc, doc } from "firebase/firestore";
 import Swal from "sweetalert2"; // Import SweetAlert2
-import { FaTimesCircle, FaArrowLeft } from "react-icons/fa"; // Added back arrow icon
+import { FaTimesCircle, FaArrowLeft, FaTrash } from "react-icons/fa"; // Added trash icon
 
 const OnsitePaymentHistory = ({ onBack }) => {
   const [orders, setOrders] = useState([]);
@@ -42,6 +42,36 @@ const OnsitePaymentHistory = ({ onBack }) => {
     setSelectedOrder(null);
   };
 
+  // Handle Delete action with SweetAlert confirmation
+  const handleDeleteOrder = async (orderId) => {
+    const result = await Swal.fire({
+      title: "Are you sure?",
+      text: "Once deleted, this order cannot be recovered.",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Yes, delete it!",
+    });
+
+    if (result.isConfirmed) {
+      try {
+        // Delete the order from Firestore
+        const orderRef = doc(firestore, "OnsiteHistory", orderId);
+        await deleteDoc(orderRef);
+
+        // Re-fetch the orders after deletion
+        fetchOrders();
+
+        // Show success message
+        Swal.fire("Deleted!", "The order has been deleted.", "success");
+      } catch (error) {
+        console.error("Error deleting order:", error);
+        Swal.fire("Error", "There was an issue deleting the order.", "error");
+      }
+    }
+  };
+
   return (
     <div className="p-6 sm:p-8 bg-gray-50 min-h-screen w-full">
       {/* Back Button */}
@@ -78,7 +108,6 @@ const OnsitePaymentHistory = ({ onBack }) => {
                   <td className="py-3 px-4">
                     ₱ {order.totalAmount.toFixed(2)}
                   </td>
-
                   <td className="py-3 px-4">{order.paymentMethod}</td>
                   <td className="py-3 px-4">
                     <span
@@ -95,9 +124,15 @@ const OnsitePaymentHistory = ({ onBack }) => {
                   <td className="py-3 px-4">
                     <button
                       onClick={() => handleViewDetails(order)}
-                      className="text-blue-500 hover:text-blue-700"
+                      className="text-blue-500 hover:text-blue-700 mr-4"
                     >
                       View
+                    </button>
+                    <button
+                      onClick={() => handleDeleteOrder(order.id)}
+                      className="text-red-500 hover:text-red-700"
+                    >
+                      <FaTrash />
                     </button>
                   </td>
                 </tr>
@@ -117,7 +152,7 @@ const OnsitePaymentHistory = ({ onBack }) => {
               </h2>
               <button
                 onClick={closeOrderDetailsModal}
-                className="text-gray-500 text-2xl cursor-pointer hover:text-red-700"
+                className="text-gray-500 text-2xl hover:text-red-700"
               >
                 <FaTimesCircle />
               </button>

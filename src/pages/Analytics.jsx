@@ -1,131 +1,173 @@
-import { useState } from "react";
+import React, { useState } from "react";
+import { Line } from "react-chartjs-2";
 import {
-  BarChart,
-  Card,
-  Divider,
-  Switch,
-  Metric,
-  Text,
-  Flex,
-} from "@tremor/react";
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Legend,
+} from "chart.js";
 
-// Your data stays the same
-const data = [
-  { date: "Jan 23", "This Year": 68560, "Last Year": 28560 },
-  { date: "Feb 23", "This Year": 70320, "Last Year": 30320 },
-  { date: "Mar 23", "This Year": 80233, "Last Year": 70233 },
-  { date: "Apr 23", "This Year": 55123, "Last Year": 45123 },
-  { date: "May 23", "This Year": 56000, "Last Year": 80600 },
-  { date: "Jun 23", "This Year": 100000, "Last Year": 85390 },
-  { date: "Jul 23", "This Year": 85390, "Last Year": 45340 },
-  { date: "Aug 23", "This Year": 80100, "Last Year": 70120 },
-  { date: "Sep 23", "This Year": 75090, "Last Year": 69450 },
-  { date: "Oct 23", "This Year": 71080, "Last Year": 63345 },
-  { date: "Nov 23", "This Year": 61210, "Last Year": 100330 },
-  { date: "Dec 23", "This Year": 60143, "Last Year": 45321 },
-];
+// Register necessary components for Chart.js
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Legend
+);
 
-function valueFormatter(number) {
-  const formatter = new Intl.NumberFormat("en-PH", {
-    maximumFractionDigits: 0,
-    notation: "compact",
-    compactDisplay: "short",
-    style: "currency",
-    currency: "PHP",
-  });
+const Analytics = () => {
+  // Sample sales data for the coffee shop (in PHP)
+  const salesDataAll = {
+    day: [
+      { date: "2023-01-01", sales: 200 },
+      { date: "2023-01-02", sales: 250 },
+      { date: "2023-01-03", sales: 300 },
+      { date: "2023-01-04", sales: 220 },
+      { date: "2023-01-05", sales: 270 },
+      { date: "2023-01-06", sales: 280 },
+      { date: "2023-01-07", sales: 350 },
+    ],
+    week: [
+      { date: "Week 1", sales: 2000 },
+      { date: "Week 2", sales: 2500 },
+      { date: "Week 3", sales: 3000 },
+      { date: "Week 4", sales: 2700 },
+    ],
+    month: [
+      { date: "Jan", sales: 5000 },
+      { date: "Feb", sales: 6000 },
+      { date: "Mar", sales: 5500 },
+      { date: "Apr", sales: 7000 },
+      { date: "May", sales: 8000 },
+      { date: "Jun", sales: 9000 },
+      { date: "Jul", sales: 8500 },
+      { date: "Aug", sales: 9500 },
+      { date: "Sep", sales: 10000 },
+      { date: "Oct", sales: 12000 },
+      { date: "Nov", sales: 14000 },
+      { date: "Dec", sales: 15000 },
+    ],
+    year: [
+      { date: "2023", sales: 120000 },
+      { date: "2024", sales: 9000 },
+      { date: "2025", sales: 6000 },
+    ],
+  };
 
-  return formatter.format(number);
-}
+  // State to store selected filter
+  const [filter, setFilter] = useState("month");
 
-export default function Example() {
-  const [showComparison, setShowComparison] = useState(false);
+  // Function to format sales data based on selected filter
+  const getDataForFilter = (filter) => {
+    let filteredData = salesDataAll[filter];
+    const labels = filteredData.map((data) => data.date);
+    const data = filteredData.map((data) => data.sales);
 
-  // Calculate total orders for the current and last year
-  const totalOrdersThisYear = data.reduce(
-    (acc, current) => acc + current["This Year"],
-    0
-  );
-  const totalOrdersLastYear = data.reduce(
-    (acc, current) => acc + current["Last Year"],
-    0
-  );
+    return {
+      labels,
+      datasets: [
+        {
+          label: "Sales",
+          data,
+          borderColor: "#724E2C", // Line color
+          backgroundColor: "#724E2C", // Line fill color
+          fill: true,
+          tension: 0.4, // Smoothing the line
+          pointRadius: 5, // Circle size for data points
+          pointBackgroundColor: "green",
+          pointBorderColor: "#ffffff",
+          pointBorderWidth: 2,
+          pointHoverRadius: 7,
+        },
+      ],
+    };
+  };
+
+  // Chart options to customize the chart behavior
+  const options = {
+    responsive: true,
+    plugins: {
+      title: {
+        display: true,
+        text: "Bean & Byte Sales Overview",
+        font: {
+          size: 18,
+        },
+      },
+      tooltip: {
+        callbacks: {
+          label: function (tooltipItem) {
+            return `₱ ${tooltipItem.raw.toLocaleString()}`; // Formatting the tooltip to show currency
+          },
+        },
+      },
+    },
+    scales: {
+      x: {
+        title: {
+          display: true,
+          text:
+            filter === "year" ? "Year" : filter === "month" ? "Month" : "Day",
+        },
+      },
+      y: {
+        title: {
+          display: true,
+          text: "Sales (PHP)",
+        },
+        ticks: {
+          beginAtZero: true,
+          callback: function (value) {
+            return `₱ ${value.toLocaleString()}`;
+          },
+        },
+      },
+    },
+  };
 
   return (
-    <div className=" p-8 w-full ">
-      <Card className="mx-auto max-w-5xl p-8 rounded-xl shadow-xl lg:ml-[20px] ">
-        <h3 className="text-2xl font-bold text-gray-800  mb-4">
-          Sales Overview
-        </h3>
-        <p className="text-gray-800  mb-6">
-          The following chart illustrates the sales comparison between this year
-          and last year, showcasing total sales and growth trends.
-        </p>
+    <div className="p-8">
+      {/* Filter Buttons */}
+      <div className="flex flex-wrap space-x-4 mb-8">
+        <button
+          className="px-4 py-2  cursor-pointer bg-[#724E2C] hover:bg-[#a79482] text-white rounded mb-4 sm:mb-0"
+          onClick={() => setFilter("day")}
+        >
+          Day
+        </button>
+        <button
+          className="px-4 py-2 bg-[#724E2C] hover:bg-[#a79482] text-white rounded mb-4 sm:mb-0"
+          onClick={() => setFilter("week")}
+        >
+          Week
+        </button>
+        <button
+          className="px-4 py-2 bg-[#724E2C] hover:bg-[#a79482] text-white rounded mb-4 sm:mb-0"
+          onClick={() => setFilter("month")}
+        >
+          Month
+        </button>
+        <button
+          className="px-4 py-2 bg-[#724E2C] hover:bg-[#a79482] text-white rounded mb-4 sm:mb-0"
+          onClick={() => setFilter("year")}
+        >
+          Year
+        </button>
+      </div>
 
-        <div className="flex flex-col sm:flex-row sm:space-x-10 mt-8">
-          {/* Bar Chart for Sales Data (Left Side) */}
-          <div className="sm:w-2/3">
-            <BarChart
-              data={data}
-              index="date"
-              categories={
-                showComparison ? ["Last Year", "This Year"] : ["This Year"]
-              }
-              colors={showComparison ? ["#00B5D9", "#004C8C"] : ["#004C8C"]}
-              valueFormatter={valueFormatter}
-              yAxisWidth={50}
-              className="h-72"
-            />
-            {/* Mobile Version of Bar Chart */}
-            <BarChart
-              data={data}
-              index="date"
-              categories={
-                showComparison ? ["Last Year", "This Year"] : ["This Year"]
-              }
-              colors={showComparison ? ["#00B5D9", "#004C8C"] : ["#004C8C"]}
-              valueFormatter={valueFormatter}
-              showYAxis={false}
-              className="h-60 sm:hidden"
-            />
-          </div>
-
-          {/* Total Orders Box (Right Side) */}
-          <div className="sm:w-1/3 flex flex-col space-y-6">
-            <div className="bg-gradient-to-r from-indigo-500 to-purple-600 p-6 rounded-lg shadow-lg text-white">
-              <Metric value={valueFormatter(totalOrdersThisYear)} />
-              <Text>Total Orders This Year</Text>
-            </div>
-            <div className="bg-gradient-to-r from-gray-400 to-gray-600 p-6 rounded-lg shadow-lg text-white">
-              <Metric value={valueFormatter(totalOrdersLastYear)} />
-              <Text>Total Orders Last Year</Text>
-            </div>
-          </div>
-        </div>
-
-        <Divider className="my-6" />
-
-        {/* Toggle Comparison */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-4">
-            <Switch
-              id="comparison"
-              onChange={() => setShowComparison(!showComparison)}
-              className="bg-[#004C8C] rounded-full"
-            />
-            <label
-              htmlFor="comparison"
-              className="text-gray-700 dark:text-white font-semibold"
-            >
-              Show Same Period Last Year
-            </label>
-          </div>
-          <div className="text-gray-500 dark:text-gray-400 text-sm">
-            {showComparison
-              ? "Showing comparison data."
-              : "Showing this year's data."}
-          </div>
-        </div>
-      </Card>
+      {/* Line Chart */}
+      <div className="flex justify-center w-full sm:w-[80%] h-[400px] sm:h-[500px]">
+        <Line data={getDataForFilter(filter)} options={options} />
+      </div>
     </div>
   );
-}
+};
+
+export default Analytics;
