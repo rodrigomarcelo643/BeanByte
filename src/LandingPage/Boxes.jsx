@@ -1,8 +1,8 @@
 import { useEffect, useState, useRef } from "react";
 import { motion } from "framer-motion";
-import supportIcon from "../assets/support.png"; // Corrected import for image
-import salesIcon from "../assets/support.png"; // Add your other icons similarly
-import processIcon from "../assets/support.png";
+import supportIcon from "../assets/support.png";
+import salesIcon from "../assets/sales_icon.png";
+import processIcon from "../assets/process_icon.png";
 import productIcon from "../assets/product.png";
 import qualityIcon from "../assets/quality.png";
 import resultIcon from "../assets/result.png";

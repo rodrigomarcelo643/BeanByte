@@ -348,7 +348,7 @@ export default function Products() {
       )}
 
       <div
-        className="fixed bottom-8 right-8 bg-[#724E2C] text-white p-4 w-[80px] h-[80px] rounded-full shadow-lg cursor-pointer flex items-center justify-center flex-col"
+        className="fixed bottom-8 z-999 right-8 bg-[#724E2C] text-white p-4 w-[80px] h-[80px] rounded-full shadow-lg cursor-pointer flex items-center justify-center flex-col"
         onClick={handleCheckout}
       >
         <span className="text-sm">{cart.length}</span>
