@@ -7,7 +7,7 @@ import coffeeGif from "../assets/coffee.gif";
 
 const LoadingModal = () => (
   <div className="fixed inset-0 bg-[rgba(0,0,0,0.3)] flex justify-center items-center z-50">
-    <div className="bg-white rounded-lg flex flex-col justify-center items-center">
+    <div className="bg-white rounded-lg flex flex-col justify-center items-center p-6">
       <img src={coffeeGif} className="w-60 h-60" alt="Loading" />
       <p className="mt-4 text-[#724E2C] text-xl relative top-[-80px] font-semibold">
         Bean&Co....
@@ -49,7 +49,7 @@ const DefaultPage = () => {
         <div className="flex justify-center space-x-6 flex-wrap sm:space-x-10">
           {/* Admin Box */}
           <div
-            className="flex flex-col items-center justify-center bg-[#f3f3f3] p-6 rounded-sm shadow-md cursor-pointer hover:bg-[#e0e0e0] transition-all duration-300 ease-in-out w-32 sm:w-48 md:w-56 border-2 border-[#bd9d7f]"
+            className="flex flex-col items-center justify-center bg-[#f3f3f3] p-6 rounded-sm shadow-md cursor-pointer hover:bg-[#e0e0e0] transition-all duration-300 ease-in-out w-full sm:w-48 md:w-56 border-2 border-[#bd9d7f] mb-6 sm:mb-0"
             onClick={() => handleSelect("admin")}
           >
             <img
@@ -64,7 +64,7 @@ const DefaultPage = () => {
 
           {/* Customer Box */}
           <div
-            className="flex flex-col items-center justify-center bg-[#f3f3f3] p-6 rounded-sm shadow-md cursor-pointer hover:bg-[#e0e0e0] transition-all duration-300 ease-in-out w-32 sm:w-48 md:w-56 border-2 border-[#bd9d7f]"
+            className="flex flex-col items-center justify-center bg-[#f3f3f3] p-6 rounded-sm shadow-md cursor-pointer hover:bg-[#e0e0e0] transition-all duration-300 ease-in-out w-full sm:w-48 md:w-56 mb-6 sm:mb-0"
             onClick={() => handleSelect("customer")}
           >
             <img
