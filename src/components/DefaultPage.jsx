@@ -49,13 +49,13 @@ const DefaultPage = () => {
         <div className="flex justify-center space-x-6 flex-wrap sm:space-x-10">
           {/* Admin Box */}
           <div
-            className="flex flex-col items-center justify-center bg-[#f3f3f3] p-6 rounded-sm shadow-md cursor-pointer hover:bg-[#e0e0e0] transition-all duration-300 ease-in-out w-full sm:w-48 md:w-56 border-2 border-[#bd9d7f] mb-6 sm:mb-0"
+            className="flex flex-col items-center justify-center bg-[#f3f3f3] p-6 rounded-sm shadow-md cursor-pointer hover:bg-[#e0e0e0] transition-all duration-300 ease-in-out w-full sm:w-60 md:w-56 border-2 border-[#bd9d7f] mb-6 sm:mb-0"
             onClick={() => handleSelect("admin")}
           >
             <img
               src={adminIcon}
               alt="Admin Icon"
-              className="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 mb-4"
+              className="w-25 h-20 sm:w-20 sm:h-20 md:w-24 md:h-24 mb-4"
             />
             <p className="text-xl sm:text-2xl text-gray-600 font-medium">
               Admin
@@ -64,7 +64,7 @@ const DefaultPage = () => {
 
           {/* Customer Box */}
           <div
-            className="flex flex-col items-center justify-center bg-[#f3f3f3] p-6 rounded-sm shadow-md cursor-pointer hover:bg-[#e0e0e0] transition-all duration-300 ease-in-out w-full sm:w-48 md:w-56 mb-6 sm:mb-0"
+            className="flex flex-col items-center justify-center bg-[#f3f3f3] p-6 rounded-sm shadow-md cursor-pointer hover:bg-[#e0e0e0] transition-all duration-300 ease-in-out w-full border-2 border-[#bd9d7f] sm:w-48 md:w-56 mb-6 sm:mb-0"
             onClick={() => handleSelect("customer")}
           >
             <img
