@@ -1,7 +1,8 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { FaArrowLeft } from "react-icons/fa";
-import { auth, sendPasswordResetEmail } from "firebase/auth"; // Assuming the correct imports
+import { auth } from "../../config/firebase";
+import { sendPasswordResetEmail } from "firebase/auth";
 import coffeeGif from "../assets/coffee.gif";
 
 const LoadingModal = () => (
@@ -23,7 +24,7 @@ const ForgotPassword = () => {
   const navigate = useNavigate();
 
   const handleBack = () => {
-    navigate("/Bean&Co.Login");
+    navigate("/AdminLogin");
   };
 
   const handlePasswordReset = async () => {
@@ -38,17 +39,6 @@ const ForgotPassword = () => {
     }
 
     try {
-      // Check if email exists in Firebase Authentication
-      const methods = await auth.fetchSignInMethodsForEmail(email);
-
-      if (methods.length === 0) {
-        // Email does not exist in Firebase Authentication
-        setError("Email not found. Please check the email address.");
-        setLoading(false); // Hide loading modal
-        return;
-      }
-
-      // Proceed with password reset if email exists in Firebase
       await sendPasswordResetEmail(auth, email);
       setTimeout(() => {
         setSuccessMessage("Password reset email sent! Check your inbox.");
@@ -56,7 +46,7 @@ const ForgotPassword = () => {
       }, 2000); // Wait for 2 seconds before showing the success message
     } catch (err) {
       setTimeout(() => {
-        setError("Error resetting password. Please try again.");
+        setError("No Found Email");
         setLoading(false); // Hide loading modal after 2 seconds
       }, 2000); // Wait for 2 seconds before showing the error message
     }
