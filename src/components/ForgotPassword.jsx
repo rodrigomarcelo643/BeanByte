@@ -1,12 +1,26 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { auth } from "../../config/firebase"; // Firebase auth import
-import { sendPasswordResetEmail } from "firebase/auth"; // Firebase function for resetting password
+import { FaArrowLeft } from "react-icons/fa";
+import { auth } from "../../config/firebase";
+import { sendPasswordResetEmail } from "firebase/auth";
+import coffeeGif from "../assets/coffee.gif";
+
+const LoadingModal = () => (
+  <div className="fixed inset-0 bg-[rgba(0,0,0,0.3)] flex justify-center items-center z-50">
+    <div className="bg-white rounded-lg flex flex-col justify-center items-center p-4">
+      <img src={coffeeGif} className="w-60 h-60" alt="Loading..." />
+      <p className="mt-4 relative top-[-70px] text-[#724E2C] text-xl font-semibold">
+        Bean&Co....
+      </p>
+    </div>
+  </div>
+);
 
 const ForgotPassword = () => {
   const [email, setEmail] = useState("");
   const [error, setError] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
+  const [loading, setLoading] = useState(false); // State for showing the loading modal
   const navigate = useNavigate();
 
   const handleBack = () => {
@@ -16,53 +30,62 @@ const ForgotPassword = () => {
   const handlePasswordReset = async () => {
     setError("");
     setSuccessMessage("");
+    setLoading(true); // Show loading modal
 
     if (!email) {
       setError("Please enter your email address.");
+      setLoading(false); // Hide loading modal
       return;
     }
 
     try {
       await sendPasswordResetEmail(auth, email);
-      setSuccessMessage("Password reset email sent! Check your inbox.");
+      setTimeout(() => {
+        setSuccessMessage("Password reset email sent! Check your inbox.");
+        setLoading(false); // Hide loading modal after 2 seconds
+      }, 2000); // Wait for 2 seconds before showing the success message
     } catch (err) {
-      setError("Failed to send reset email. Please try again.");
+      setTimeout(() => {
+        setError("No Found Email");
+        setLoading(false); // Hide loading modal after 2 seconds
+      }, 2000); // Wait for 2 seconds before showing the error message
     }
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 flex justify-center items-center">
-      <div className="max-w-md w-full bg-white p-8 rounded-lg shadow-lg">
-        {/* Back button */}
+    <div className="min-h-screen bg-gray-100 flex justify-center items-center px-4 relative">
+      {/* Show Loading Modal if loading state is true */}
+      {loading && <LoadingModal />}
+
+      <div className="relative max-w-md w-full bg-white p-8 rounded-lg shadow-lg space-y-6">
+        {/* Back button with icon, fixed to top-left of the screen */}
         <button
           onClick={handleBack}
-          className="absolute top-4 left-4 text-lg text-[#b18b68] hover:underline"
+          className="fixed top-4 left-4 cursor-pointer text-[#b18b68] text-2xl hover:text-[#724E2C] transition-all duration-200 z-50"
         >
-          &larr; Back
+          <FaArrowLeft />
         </button>
 
-        <h2 className="text-2xl font-semibold text-center mb-6">
+        <h2 className="text-2xl font-semibold text-center text-[#724E2C]">
           Forgot Password?
         </h2>
 
-        <div className="space-y-4">
+        <div className="space-y-1">
           {/* Email input */}
-          <div>
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#b18b68] focus:border-[#b18b68] text-sm"
-              placeholder="Enter your email"
-            />
-          </div>
+          <input
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#b18b68] focus:border-[#b18b68] text-sm"
+            placeholder="Enter your email"
+          />
 
           {/* Error message */}
-          {error && <p className="text-red-500 text-sm">{error}</p>}
+          {error && <p className="text-red-500 mb-2 text-sm">{error}</p>}
 
           {/* Success message */}
           {successMessage && (
-            <p className="text-green-500 text-sm">{successMessage}</p>
+            <p className="text-green-500 text-sm mb-2">{successMessage}</p>
           )}
 
           {/* Reset password button */}
