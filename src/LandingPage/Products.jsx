@@ -10,7 +10,8 @@ import {
 import Swal from "sweetalert2";
 import { FaShoppingCart, FaTimesCircle } from "react-icons/fa";
 import { v4 as uuidv4 } from "uuid";
-import { ref, uploadBytes, getDownloadURL } from "firebase/storage"; // Add Firebase storage imports
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import uploadProof from "../assets/uploadProof.jpg";
 
 export default function Products() {
   const [products, setProducts] = useState([]);
@@ -357,8 +358,8 @@ export default function Products() {
 
       {/* Cart Modal */}
       {showCartModal && (
-        <div className="fixed inset-0 bg-[rgba(0,0,0,0.1)] flex justify-center overflow-y-scroll items-center z-10">
-          <div className="bg-white p-6 w-[100%] md:w-[100%] h-full">
+        <div className="fixed inset-0 bg-[rgba(0,0,0,0.1)] flex justify-center items-center z-10">
+          <div className="bg-white p-6 w-[100%] md:w-[100%] h-full overflow-y-scroll">
             <button
               onClick={handleCloseModal}
               className="absolute top-2 right-2 text-xl text-gray-500"
@@ -456,7 +457,13 @@ export default function Products() {
                   {checkoutDetails.paymentMode &&
                     checkoutDetails.paymentMode !== "Cash on Delivery" && (
                       <div className="mt-4">
-                        <label className="block text-gray-600">
+                        <div className="flex gap-4 justify-center ">
+                          <img src={uploadProof} className="w-60 h-80" />
+                          <h1 className="relative top-30">
+                            Neil Delante - 09086602701
+                          </h1>
+                        </div>
+                        <label className="block  text-gray-600">
                           Upload Payment Proof
                         </label>
                         <input

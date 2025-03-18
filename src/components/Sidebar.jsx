@@ -66,7 +66,7 @@ export function Sidebar() {
   const location = useLocation();
   const navigate = useNavigate();
   const userData = location.state?.userData;
-  console.log("Sidenar", userData);
+  console.log("Sidebar", userData);
   const [open, setOpen] = useState(0);
   const [activeContent, setActiveContent] = useState(<Analytics />);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -178,7 +178,7 @@ export function Sidebar() {
       setUnreadCount((prevCount) => prevCount + newNotifications.length);
     });
 
-    return () => unsubscribe(); // Cleanup listener on unmount
+    return () => unsubscribe();
   }, []);
 
   const updateContent = (content) => {

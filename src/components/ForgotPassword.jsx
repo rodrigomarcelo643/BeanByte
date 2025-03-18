@@ -30,11 +30,11 @@ const ForgotPassword = () => {
   const handlePasswordReset = async () => {
     setError("");
     setSuccessMessage("");
-    setLoading(true); // Show loading modal
+    setLoading(true); 
 
     if (!email) {
       setError("Please enter your email address.");
-      setLoading(false); // Hide loading modal
+      setLoading(false); 
       return;
     }
 
